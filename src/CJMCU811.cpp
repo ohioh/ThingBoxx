@@ -10,15 +10,14 @@
    ########################################################################################################
 */
 #include <Arduino.h>
+#include <Wire.h>    // I2C library
+#include <ccs811.h>  // CCS811 library
+
 #include "Variables.hpp"
 #include "LED.hpp"
 #include "Tasks.hpp"
 #include "Display.hpp"
 #include "EEPROM.hpp"
-#include <Wire.h>    // I2C library
-#include <ccs811.h>  // CCS811 library
-
-
 #include "CJMCU811.hpp"
 
 CCS811 ccs811(23); // nWAKE on 23
