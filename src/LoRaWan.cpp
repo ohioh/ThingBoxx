@@ -156,16 +156,17 @@ void zennerParserPrepair()
 
 extern uint16_t appData[];
 
+/**
+    Size of values in Payload as binary
+    depends to uintXX_t appData[]
+    appDataSize = 12; //AppDataSize max value is 64 -> each number is for 2 digits
+    Important: AppDataSize representate the number of transmitted bytes
+    Parser:  [Elixier]: def parse(<<state::16,bat::16,cotwo::16>>, %{meta: %{frame_port: 2}}) do
+*/
 void prepareTxFrame(uint8_t port)
 {
   Serial.println("[Payload]: prepair TX Frame");
-  /*
-    //Size of values in Payload as binary
-    //depends to uintXX_t appData[]
-    appDataSize = 12; //AppDataSize max value is 64 -> each number is for 2 digits
-    //Important: AppDataSize representate the number of transmitted bytes
-    Parser:  [Elixier]: def parse(<<state::16,bat::16,cotwo::16>>, %{meta: %{frame_port: 2}}) do
-  */
+  
   decToBinary(averageCO2Store);
   zennerParserPrepair();
   appDataSize = 6;//AppDataSize max value is 64

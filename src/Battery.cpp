@@ -29,6 +29,7 @@
 TaskHandle_t readVoltageTask;
 
 int Reading4Task;
+
 int PowerPinTask;
 
 void codeReadVoltageTask( void * parameter )
@@ -46,6 +47,7 @@ void codeReadVoltageTask( void * parameter )
 int ReadVoltage(int PowerPin) {
   
   PowerPinTask = PowerPin;
+  
   xTaskCreatePinnedToCore(
     codeReadVoltageTask,           /*Task Function. */
     "WriteVoltage2PPROM",               /*name of task. */
@@ -63,5 +65,4 @@ int ReadVoltage(int PowerPin) {
 
 
 
-/* 
-*/
+

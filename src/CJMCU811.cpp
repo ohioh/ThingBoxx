@@ -21,14 +21,11 @@
 #include "CJMCU811.hpp"
 
 CCS811 ccs811(23); // nWAKE on 23
-
 TaskHandle_t readCO2Task;
 
+uint16_t eco2, etvoc, errstat, raw;
 int Reading4TaskCO2;
 int counter = 30;
-uint16_t eco2, etvoc, errstat, raw;
-
-
 
 void codeReadCO2Task( void * parameter )
 {
