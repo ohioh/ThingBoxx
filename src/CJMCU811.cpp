@@ -1,12 +1,9 @@
 /*##########################################################################################################
     CJMCU811.cpp
     Link: printing results of the CCS811 digital gas sensor for monitoring indoor air quality from ams.
-
-
-
-
-
-
+    https://revspace.nl/CJMCU-811#Application_to_air_quality_monitoring_at_RevSpace
+    Supply Current: 30ma
+    https://learn.sparkfun.com/tutorials/ccs811-air-quality-breakout-hookup-guide
    ########################################################################################################
 */
 #include <Arduino.h>
