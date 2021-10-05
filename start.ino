@@ -20,6 +20,11 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 Adafruit_CCS811 ccs;
 
+int count = 0;
+int temp = 0;
+int humidity = 0;
+int Co2 = 0;
+
 
 
 void setup()
@@ -63,16 +68,31 @@ void setup()
 
 void loop()
 {
-  int temp = loopTemperature();
-  int humidity = loopHumidity();
+  temp = loopTemperature() ;
+  humidity = loopHumidity();
   if (ccs.available())
   {
+    if (count == 1) {
+      Serial.println("Set new Baseline [1]");
+      uint16_t Baseline = ccs.getBaseline();
+      ccs.setBaseline(Baseline);
+
+    } else if (count == 60) {
+      Serial.println("Set new Baseline [60]");
+      uint16_t Baseline = ccs.getBaseline();
+      ccs.setBaseline(Baseline);
+      count = 0;
+    }
+    count++;
+
+    ccs.setEnvironmentalData(humidity, temp);
     if (!ccs.readData())
     {
 
       // ---------------------------
       Serial.print("CO2: ");
-      Serial.print(ccs.geteCO2());
+      Co2 = ccs.geteCO2(); 
+      Serial.print(Co2);
       Serial.print("ppm, TVOC: ");
       Serial.println(ccs.getTVOC());
 
@@ -83,13 +103,13 @@ void loop()
 
       display.setTextSize(5);
       display.setCursor(5, 20);
-      display.print(ccs.geteCO2());
+      display.print(Co2);
 
       display.setTextSize(1);
       display.setCursor(110, 57);
       display.print("PPM");
 
-      display.display();      
+      display.display();
       delay(2000);
 
       // ---------------------------
