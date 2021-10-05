@@ -28,18 +28,18 @@ void blinkRED(byte times, unsigned int ms);
 void blinkGREEN(byte times, unsigned int ms);
 void blinkBLUE(byte times, unsigned int ms);
 void blinkWHITE(byte times, unsigned int ms);
-
 */
 
-void blinkRED(uint16_t times, uint16_t ms);
-
-void blinkALERT(uint16_t times, uint16_t ms);
+void blinkRED();
+void blinkALERT();
 
 void blinkLEDBuildin();
 
-void blinkGREEN(uint16_t times, uint16_t ms);
-void blinkBLUE(uint16_t times, uint16_t ms);
-void blinkWHITE(uint16_t times, uint16_t ms);
-void blinkORANGE(uint16_t times, uint16_t ms);
+void blinkGREEN();
+void blinkBLUE();
+void blinkWHITE();
+void blinkORANGE();
+
+void mainCO22Signal(int averageCO2);
 
 #endif

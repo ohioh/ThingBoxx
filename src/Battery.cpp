@@ -1,25 +1,35 @@
-/*##########################################################################################################
+/**
+ * ##########################################################################################################
     Battery.cpp
     Link: https://github.com/HelTecAutomation/Heltec_ESP32/blob/master/examples/ESP32/ADC_Read_Voltage/Battery_power/Battery_power.ino
     Link: https://github.com/HelTecAutomation/Heltec_ESP32/blob/master/examples/ESP32/VextControl/VextControl.ino
 
-
-
-
-
+    ADC readings v voltage
+    y = -0.000000000009824x3 + 0.000000016557283x2 + 0.000854596860691x + 0.065440348345433
+    // Polynomial curve match, based on raw data thus:
+     464     0.5
+    1088     1.0
+    1707     1.5
+    2331     2.0
+    2951     2.5
+    3775     3.0
+    4095     3.7
+    //See more APIs about ADC here: https://github.com/Heltec-Aaron-Lee/WiFi_Kit_series/blob/master/esp32/cores/esp32/esp32-hal-adc.h
    ########################################################################################################
 */
+
 #include "Battery.hpp"
 #include "Variables.hpp"
 #include "Display.hpp"
 #include "EEPROM.hpp"
 #include <Arduino.h>
-#include <Wire.h>
+
 #include <cstddef>
 
 TaskHandle_t readVoltageTask;
 
 int Reading4Task;
+
 int PowerPinTask;
 
 void codeReadVoltageTask( void * parameter )
@@ -37,6 +47,7 @@ void codeReadVoltageTask( void * parameter )
 int ReadVoltage(int PowerPin) {
   
   PowerPinTask = PowerPin;
+  
   xTaskCreatePinnedToCore(
     codeReadVoltageTask,           /*Task Function. */
     "WriteVoltage2PPROM",               /*name of task. */
@@ -52,16 +63,6 @@ int ReadVoltage(int PowerPin) {
   return Reading4Task;
 } // Added an improved polynomial, use either, comment out as required
 
-//See more APIs about ADC here: https://github.com/Heltec-Aaron-Lee/WiFi_Kit_series/blob/master/esp32/cores/esp32/esp32-hal-adc.h
 
-/* ADC readings v voltage
-    y = -0.000000000009824x3 + 0.000000016557283x2 + 0.000854596860691x + 0.065440348345433
-  // Polynomial curve match, based on raw data thus:
-     464     0.5
-    1088     1.0
-    1707     1.5
-    2331     2.0
-    2951     2.5
-    3775     3.0
-    4095     3.7
-*/
+
+
