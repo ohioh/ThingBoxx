@@ -167,6 +167,8 @@ void prepareTxFrame(uint8_t port)
 {
   Serial.println("[Payload]: prepair TX Frame");
   
+
+  //TODO Why averageCO2store here and not at averageCO2?
   decToBinary(averageCO2Store);
   zennerParserPrepair();
   appDataSize = 6;//AppDataSize max value is 64

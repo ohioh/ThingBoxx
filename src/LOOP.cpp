@@ -36,10 +36,6 @@
 
 
 
-//U8X8_SSD1306_128X64_NONAME_SW_I2C u8x8(/* clock=*/ SCL, /* data=*/ SDA, /* reset=*/ U8X8_PIN_NONE);   // OLEDs without Reset of the Display
-
-byte Value1 = acutalMessurment;
-
 ///////////////////////////////////////////---Definition---///////////////////////////////////////////////////////////////////
 
 
@@ -48,18 +44,7 @@ void runLOOP() {
  
 
 
-  delay(1000);
-  delay(50);
-  blinkBLUE(3, 150);
-  delay(5000);
-  blinkORANGE(3, 5000);
-  delay(5000);
-  blinkRED(20, 1000);
-  blinkALERT(20, 1000);
-  delay(5000);
-
-
-  ESP.restart();
+  //ESP.restart();
 
 
 }
