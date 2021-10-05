@@ -25,6 +25,7 @@ Adafruit_CCS811 ccs;
 void setup()
 {
   Serial.begin(115200);
+  setupDHT22();
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C); //initialize with the I2C addr 0x3C (128x64)
   delay(500);
   display.clearDisplay();
@@ -39,13 +40,13 @@ void setup()
   delay(5000);
 
   display.clearDisplay();
-  display.setCursor(25, 15);
-  display.setTextSize(1);
+  display.setCursor(15, 15);
+  display.setTextSize(2);
   display.setTextColor(WHITE);
-  display.println("CO2 Ampel");
+  display.println("CO2-AMPEL");
   display.setCursor(25, 35);
   display.setTextSize(1);
-  display.print("Initializing");
+  display.print("Initializing...");
   display.display();
   delay(1000);
   Serial.println("CCS811 starting...");
@@ -62,10 +63,14 @@ void setup()
 
 void loop()
 {
+  int temp = loopTemperature();
+  int humidity = loopHumidity();
   if (ccs.available())
   {
     if (!ccs.readData())
     {
+
+      // ---------------------------
       Serial.print("CO2: ");
       Serial.print(ccs.geteCO2());
       Serial.print("ppm, TVOC: ");
@@ -84,14 +89,42 @@ void loop()
       display.setCursor(110, 57);
       display.print("PPM");
 
+      display.display();      
+      delay(2000);
 
-      /*display.setTextSize(2);
-        display.setCursor(0, 45);
-        display.print("TVOC:");
-        display.print(ccs.getTVOC());
+      // ---------------------------
+      display.clearDisplay();
 
-      */
+      display.setTextSize(1);
+      display.setCursor(0, 0);
+      display.print("Temperatur");
+
+      display.setTextSize(5);
+      display.setCursor(20, 20);
+      display.print(temp);
+
+      display.setTextSize(5);
+      display.setCursor(87, 20);
+      display.print("C");
       display.display();
+      delay(2000);
+
+      // ---------------------------
+      display.clearDisplay();
+
+      display.setTextSize(1);
+      display.setCursor(0, 0);
+      display.print("Luftfeuchtigkeit");
+
+      display.setTextSize(5);
+      display.setCursor(20, 20);
+      display.print(humidity);
+
+      display.setTextSize(5);
+      display.setCursor(85, 20);
+      display.print("%");
+      display.display();
+      delay(2000);
     }
     else
     {
@@ -105,4 +138,6 @@ void loop()
   }
   delay(1000);
 }
+
+
 
