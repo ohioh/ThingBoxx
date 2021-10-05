@@ -9,8 +9,5 @@
 
    ########################################################################################################
 */
-
-
 #include "Tasks.hpp"
-#include <Arduino.h>
-#include "LED.hpp"
+#include "Variables.hpp"

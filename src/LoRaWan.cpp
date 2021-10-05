@@ -9,14 +9,14 @@
 
    ########################################################################################################
 */
+#include "LoRaWan.hpp"
 #include "Settings.hpp"
 #include "Variables.hpp"
-#include "LoRaWan.hpp"
 #include "EEPROM.hpp"
 
 #include <stdlib.h>
 #include <stdint.h>
-#include <Wire.h>
+//#include <Wire.h>
 #include <bitset>
 #include <cassert>
 #include <string>

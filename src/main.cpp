@@ -7,11 +7,13 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
-#include "LOOP.hpp"
-#include "SETUP.hpp"
-#include "Variables.hpp"
+#include "loop.hpp"
+#include "setup.hpp"
+#include "variables.hpp"
 #include "LED.hpp"
-#include "DHT22.hpp"
+#include "dht22.hpp"
+//#include "co2.hpp"
+//#include "display.hpp"
 
 #define SCREEN_WIDTH 128    // OLED display width, in pixels
 #define SCREEN_HEIGHT 64    // OLED display height, in pixels
@@ -20,12 +22,12 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 Adafruit_CCS811 ccs;
 
-
-//Work Variables
 int count = 0;
 int temp = 0;
 int humidity = 0;
 int Co2 = 0;
+
+
 
 void setup()
 {

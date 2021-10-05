@@ -11,9 +11,10 @@
 */
 // reference: https://www.arduino.cc/reference/de/language/functions/digital-io/pinmode/
 // reference: https://www.arduino.cc/reference/de/language/functions/analog-io/analogwrite/
-#include "variables.hpp"
+
 #include "LED.hpp"
-#include "eeprom.hpp"
+#include "Variables.hpp"
+#include "EEPROM.hpp"
 
 #include <Arduino.h>
 #include <stdlib.h>

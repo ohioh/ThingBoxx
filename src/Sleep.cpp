@@ -12,8 +12,7 @@
 
 #include "Sleep.hpp"
 #include "Variables.hpp"
-#include "Display.hpp"
-#include <Arduino.h>
+
 
 void setDeepSleepTime(){
 

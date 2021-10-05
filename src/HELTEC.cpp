@@ -14,4 +14,3 @@
 #include "Variables.hpp"
 
 #include <Arduino.h>
-#include <Wire.h>

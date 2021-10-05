@@ -23,7 +23,7 @@
 #include "Display.hpp"
 #include "EEPROM.hpp"
 #include <Arduino.h>
-#include <Wire.h>
+
 #include <cstddef>
 
 TaskHandle_t readVoltageTask;
