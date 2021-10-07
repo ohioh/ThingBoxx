@@ -45,6 +45,7 @@ int white_ms = 1000;
 //EEPROM-Adressen
 int Battery_Address = 37;
 int BatteryValue = 95;
+uint16_t ADCValue = 0;
 int CO2_Address = 90;
 int DEVICE_STATE_ADDRESS = 25;
 int DEVICE_STATE = 77;

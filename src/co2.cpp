@@ -9,6 +9,7 @@
 
   https://github.com/sparkfun/CCS811_Air_Quality_Breakout
   https://github.com/sparkfun/SparkFun_CCS811_Arduino_Library
+  https://joy-it.net/files/files/Produkte/SEN-CCS811V1/SEN-CCS811V1-Anleitung-2.11.2020.pdf
 
   Read the TVOC and CO2 values from the SparkFun CSS811 breakout board
 

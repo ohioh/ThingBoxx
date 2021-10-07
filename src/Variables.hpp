@@ -41,6 +41,7 @@ extern int white_ms;
 //EEPROM-Adressen
 extern int Battery_Address;
 extern int BatteryValue;
+extern uint16_t ADCValue;
 extern int CO2_Address;
 extern int DEVICE_STATE_ADDRESS;
 extern int DEVICE_STATE;

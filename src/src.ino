@@ -23,14 +23,15 @@
 
   this project also release in GitHub:
   https://github.com/HelTecAutomation/ESP32_LoRaWAN
+
+
 */
 
 #include <ESP32_LoRaWAN.h>
 #include "Arduino.h"
-uint64_t chipid;
+#include "LoRaWan.hpp"
 
 /*---------------------------------------------------------------------------------------------------*/
-#include "LoRaWan.hpp"
 
 /*---------------------------------------------------------------------------------------------------*/
 
@@ -47,33 +48,35 @@ uint64_t chipid;
 #include "Storage.hpp"
 #include "Time.hpp"
 
-#define SCREEN_WIDTH 128    // OLED display width, in pixels
-#define SCREEN_HEIGHT 64    // OLED display height, in pixels
-#define OLED_RESET -1       // Reset pin # (or -1 if sharing Arduino reset pin)
+#define SCREEN_WIDTH 128 // OLED display width, in pixels
+#define SCREEN_HEIGHT 64 // OLED display height, in pixels
+#define OLED_RESET -1    // Reset pin # (or -1 if sharing Arduino reset pin)
+
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
-
 Adafruit_CCS811 ccs;
+uint64_t chipid;
 
+RTC_DATA_ATTR int BaseLineCounter = 0;
 /*---------------------------------------------------------------------------------------------------*/
 
 /*license for Heltec ESP32 LoRaWan, quary your ChipID relevant license: http://resource.heltec.cn/search */
-uint32_t  license[4] = {0x5F6DA48B, 0x6E6C4166, 0x9498A7D8, 0x1D131335};
+uint32_t license[4] = {0x5F6DA48B, 0x6E6C4166, 0x9498A7D8, 0x1D131335};
 
 /* OTAA para*/
-uint8_t DevEui[] = { 0x18, 0x34, 0x56, 0x77, 0x77, 0x77, 0x77, 0x12 };
-uint8_t AppEui[] = { 0x18, 0x34, 0x56, 0x77, 0x77, 0x77, 0x77, 0x12 };
-uint8_t AppKey[] = { 0x18, 0x34, 0x56, 0x77, 0x77, 0x77, 0x77, 0x77, 0x77, 0x77, 0x77, 0x77, 0x77, 0x77, 0x77, 0x12 };
+uint8_t DevEui[] = {0x18, 0x34, 0x56, 0x77, 0x77, 0x77, 0x77, 0x12};
+uint8_t AppEui[] = {0x18, 0x34, 0x56, 0x77, 0x77, 0x77, 0x77, 0x12};
+uint8_t AppKey[] = {0x18, 0x34, 0x56, 0x77, 0x77, 0x77, 0x77, 0x77, 0x77, 0x77, 0x77, 0x77, 0x77, 0x77, 0x77, 0x12};
 
 /* ABP para*/
-uint8_t NwkSKey[] = { 0x15, 0xb1, 0xd0, 0xef, 0xa4, 0x63, 0xdf, 0xbe, 0x3d, 0x11, 0x18, 0x1e, 0x1e, 0xc7, 0xda, 0x85 };
-uint8_t AppSKey[] = { 0xd7, 0x2c, 0x78, 0x75, 0x8c, 0xdc, 0xca, 0xbf, 0x55, 0xee, 0x4a, 0x77, 0x8d, 0x16, 0xef, 0x67 };
-uint32_t DevAddr =  ( uint32_t )0x007e6ae1;
+uint8_t NwkSKey[] = {0x15, 0xb1, 0xd0, 0xef, 0xa4, 0x63, 0xdf, 0xbe, 0x3d, 0x11, 0x18, 0x1e, 0x1e, 0xc7, 0xda, 0x85};
+uint8_t AppSKey[] = {0xd7, 0x2c, 0x78, 0x75, 0x8c, 0xdc, 0xca, 0xbf, 0x55, 0xee, 0x4a, 0x77, 0x8d, 0x16, 0xef, 0x67};
+uint32_t DevAddr = (uint32_t)0x007e6ae1;
 
 /*LoraWan channelsmask, default channels 0-7*/
-uint16_t userChannelsMask[6] = { 0x00FF, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000 };
+uint16_t userChannelsMask[6] = {0x00FF, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000};
 
 /*LoraWan Class, Class A and Class C are supported*/
-DeviceClass_t  loraWanClass = CLASS_A;
+DeviceClass_t loraWanClass = CLASS_A;
 
 /*the application data transmission duty cycle.  value in [ms].*/
 uint32_t appTxDutyCycle = 15000;
@@ -123,12 +126,16 @@ uint8_t debugLevel = LoRaWAN_DEBUG_LEVEL;
 /*LoraWan region, select in arduino IDE tools*/
 LoRaMacRegion_t loraWanRegion = ACTIVE_REGION;
 
-
 int count = 1;
 
 // Add your initialization code here
 void setup()
 {
+  //Set ADC to read out the Battery status:
+  setADC();
+
+
+
   Serial.begin(115200);
 
   //Pin to read Battery
@@ -143,7 +150,10 @@ void setup()
   setupDHT22();
   setLEDPins();
 
-  while (!Serial);
+  while (!Serial)
+    ;
+
+  //Activate the LoRaWan-Module
   SPI.begin(SCK, MISO, MOSI, SS);
   Mcu.init(SS, RST_LoRa, DIO0, DIO1, license);
   deviceState = DEVICE_STATE_INIT;
@@ -176,18 +186,34 @@ void setup()
   display.print("Initializing...");
   display.display();
   delay(1000);
+
+  //Start CCS811:
   Serial.println("CCS811 starting...");
+
+  //TODO : Not working to set the Drive Mode
+  //ccs.setDriveMode(2);
   if (!ccs.begin())
   {
     Serial.println("Failed to start CCS811 sensor! Please check wiring.");
     //while (1);
-  } else {
+  }
+  else
+  {
+    /**************************************************************************/
+    /*!
+        (es werden keine Messungen durchgeführt)
+        Modus 1 IAQ Messung jede Sekunde
+        Modus 2 IAQ Messung alle 10 Sekunden
+        Modus 3 IAQ Messung alle 60 Sekunden
+        Modus 4 IAQ Messung alle 250 ms
+        (es wird nicht eCO2 und TVOC berechnet)
+    */
+    /**************************************************************************/
     Serial.println("CCS811 started");
   }
 
   // Wait for the sensor to be ready
   //while (!ccs.available());
-
 }
 
 // The loop function is called in an endless loop
@@ -198,36 +224,48 @@ void loop()
     Serial.printf("ESP32 Chip ID = %04X", (uint16_t)(chipid >> 32)); //print High 2 bytes
     Serial.printf("%08X\n", (uint32_t)chipid); //print Low 4bytes.
   */
-  Serial.println("LOOP");
-  //Read Voltage
-  //ReadVoltage(13);
 
-  switch ( deviceState )
+  switch (deviceState)
   {
     case DEVICE_STATE_SEND:
       {
-        
-        loopTemperature() ;
+        //Read Voltage of pin
+        //ReadVoltage(13);
+        readADC();
+
+        //read DHT22
+
+        loopTemperature();
         loopHumidity();
+
         if (ccs.available())
         {
-          if (count == 1) {
+          ccs.setEnvironmentalData(humidity, temp);
+          delay(50);
+
+          if (BaseLineCounter == 0)
+          {
             Serial.println("Set new Baseline [1]");
             uint16_t Baseline = ccs.getBaseline();
             ccs.setBaseline(Baseline);
-
-          } else if (count == 30) {
+          }
+          else if (BaseLineCounter == 30)
+          {
             Serial.println("Set new Baseline [30]");
             uint16_t Baseline = ccs.getBaseline();
             ccs.setBaseline(Baseline);
-            count = 0;
+            BaseLineCounter = 0;
           }
-          Serial.println("[Loop]:Baseline-Counter");
-          Serial.println(count);
-          Serial.println("------------------");
-          count++;
+          BaseLineCounter++;
 
-          ccs.setEnvironmentalData(humidity, temp);
+          Serial.print("[Loop]:Baseline-Counter:");
+          Serial.println(BaseLineCounter);
+          Serial.println("------------------");
+
+
+
+          delay(500);
+
           if (!ccs.readData())
           {
 
@@ -295,12 +333,12 @@ void loop()
             display.setTextSize(2);
             display.setCursor(0, 5);
             display.print("ERROR!");
-            while (1);
+            while (1)
+              ;
           }
         }
 
-
-        prepareTxFrame( appPort );
+        prepareTxFrame(appPort);
         LoRaWAN.send(loraWanClass);
         deviceState = DEVICE_STATE_CYCLE;
         delay(1000);
@@ -313,7 +351,7 @@ void loop()
       {
         // Schedule next packet transmission
         Serial.println("[LOOP]: State");
-        txDutyCycleTime = appTxDutyCycle + randr( -APP_TX_DUTYCYCLE_RND, APP_TX_DUTYCYCLE_RND );
+        txDutyCycleTime = appTxDutyCycle + randr(-APP_TX_DUTYCYCLE_RND, APP_TX_DUTYCYCLE_RND);
         LoRaWAN.cycle(txDutyCycleTime);
         deviceState = DEVICE_STATE_SLEEP;
         delay(1000);
@@ -322,10 +360,10 @@ void loop()
     case DEVICE_STATE_SLEEP:
       {
         /*Serial.println("[LOOP]: Sleep");
-          Serial.println(txDutyCycleTime);
-          Serial.println("Restarting in 10 seconds");
-          delay(10000);
-          ESP.restart();
+              Serial.println(txDutyCycleTime);
+              Serial.println("Restarting in 10 seconds");
+              delay(10000);
+              ESP.restart();
         */
         LoRaWAN.sleep(loraWanClass, debugLevel);
         break;
