@@ -1,15 +1,16 @@
 //########################################################################################################
-//  REBOOT.cpp
+//  Time.hpp
 //  
 //
 //########################################################################################################
-#include "REBOOT.hpp"
-#include <Arduino.h>
+#ifndef TIME_HPP
+#define TIME_HPP
 
-void rebootESP32(int timeToReboot) {
-  Serial.println("Restarting in 10 seconds");
+#pragma once
 
-  delay(timeToReboot);
 
-  ESP.restart();
-}
+void setESP32Time();
+void getESP32Time();
+void storeESP32Time();
+
+#endif

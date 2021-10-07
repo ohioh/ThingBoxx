@@ -1,19 +1,13 @@
+  
 /*##########################################################################################################
     LoRaWan.cpp
     Link:
-
-
-
-
-
-
    ########################################################################################################
 */
 #include "LoRaWan.hpp"
-#include "Settings.hpp"
-#include "Variables.hpp"
-#include "EEPROM.hpp"
-
+#include "variables.hpp"
+#include "Arduino.h"
+#include <ESP32_LoRaWAN.h>
 #include <stdlib.h>
 #include <stdint.h>
 //#include <Wire.h>
@@ -143,15 +137,7 @@ void zennerParserPrepair()
 //  Collecting Data from Sensors and ESP32 and prepair this values for payload transfer
 //
 //  Called Variables:
-//    1.binaryHardwareStatus    7.PM1           13.qmPM2.5[soon]
-//    2.binaryBatteryStatus     8.PM2.5         14.qmPM4[soon]
-//    3.binaryTemperature       9.PM4           15.qmPM5[soon]
-//    4.binaryHumidity         10.PM5           16.qmPM10[soon]
-//    5.binaryCO2              11.PM10
-//    6.binaryVOC              12.qmPM1[soon]
 //
-//  Mass concentration:   PM1.0, PM2.5, PM4 and PM10
-//  Number concentration:  PM0.5, PM1.0, PM2.5, PM4 and PM10
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 extern uint16_t appData[];
@@ -163,34 +149,34 @@ extern uint16_t appData[];
     Important: AppDataSize representate the number of transmitted bytes
     Parser:  [Elixier]: def parse(<<state::16,bat::16,cotwo::16>>, %{meta: %{frame_port: 2}}) do
 */
+
+
+
 void prepareTxFrame(uint8_t port)
 {
   Serial.println("[Payload]: prepair TX Frame");
-  
-
-  //TODO Why averageCO2store here and not at averageCO2?
-  decToBinary(averageCO2Store);
-  zennerParserPrepair();
   appDataSize = 6;//AppDataSize max value is 64
 
   decToBinary(DEVICE_STATE);
   zennerParserPrepair();
   appData[0] = binPlatformData; //state
   delay(50);
-  
+
   decToBinary(BatteryValue);
   zennerParserPrepair();
   appData[1] = binPlatformData;   //battery
-  delay(50);
+  delay(500);
   
-  decToBinary(averageCO2);
-  zennerParserPrepair();
-  appData[2] = binPlatformData;   //co2
+  decToBinary(Co2);
   delay(50);
+  zennerParserPrepair();
+  delay(50);
+  appData[2] = binPlatformData;   //co2
+  delay(500);
 
   Serial.println("FrameBuildDone");
 }
-
+ 
 
 ///////////////////////////////////////////////---Use LoRaWan---//////////////////////////////////////////////////////////////
 //

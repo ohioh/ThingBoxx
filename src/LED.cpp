@@ -12,14 +12,13 @@
 // reference: https://www.arduino.cc/reference/de/language/functions/digital-io/pinmode/
 // reference: https://www.arduino.cc/reference/de/language/functions/analog-io/analogwrite/
 
-#include "LED.hpp"
-#include "Variables.hpp"
-#include "EEPROM.hpp"
-
 #include <Arduino.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <cstddef>
+
+#include "LED.hpp"
+#include "Variables.hpp"
 
 TaskHandle_t redAlertBlinkCore;
 TaskHandle_t redLEDBlinkCore;

@@ -21,7 +21,7 @@
 #include "Battery.hpp"
 #include "Variables.hpp"
 #include "Display.hpp"
-#include "EEPROM.hpp"
+#include "Storage.hpp"
 #include <Arduino.h>
 
 #include <cstddef>
