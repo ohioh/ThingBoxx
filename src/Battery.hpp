@@ -17,7 +17,8 @@
 #define BATTERY_HPP
 
 
-
+void setADC();
+void readADC();
 int ReadVoltage(int PowerPin);
 
 #endif 
