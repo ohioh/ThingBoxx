@@ -42,12 +42,13 @@
 #include <Adafruit_SSD1306.h>
 
 #include "Variables.hpp"
-#include "LED.hpp"
+#include "LED1.hpp"
 #include "DHT22.hpp"
 #include "Battery.hpp"
 #include "Storage.hpp"
 #include "Time.hpp"
 #include "Sleep.hpp"
+#include "license.hpp"
 
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
@@ -58,16 +59,13 @@ Adafruit_CCS811 ccs;
 uint64_t chipid;
 
 RTC_DATA_ATTR int BaseLineCounter = 0;
-RTC_DATA_ATTR uint16_t nightTime = 21600000;
+
+//Production
+//RTC_DATA_ATTR uint16_t nightTime = 21600000;
+
+//Development
+RTC_DATA_ATTR uint16_t nightTime = 2000;
 /*---------------------------------------------------------------------------------------------------*/
-
-/*license for Heltec ESP32 LoRaWan, quary your ChipID relevant license: http://resource.heltec.cn/search */
-uint32_t license[4] = {0x5F6DA48B, 0x6E6C4166, 0x9498A7D8, 0x1D131335};
-
-/* OTAA para*/
-uint8_t DevEui[] = {0x18, 0x34, 0x56, 0x77, 0x77, 0x77, 0x77, 0x12};
-uint8_t AppEui[] = {0x18, 0x34, 0x56, 0x77, 0x77, 0x77, 0x77, 0x12};
-uint8_t AppKey[] = {0x18, 0x34, 0x56, 0x77, 0x77, 0x77, 0x77, 0x77, 0x77, 0x77, 0x77, 0x77, 0x77, 0x77, 0x77, 0x12};
 
 /* ABP para*/
 uint8_t NwkSKey[] = {0x15, 0xb1, 0xd0, 0xef, 0xa4, 0x63, 0xdf, 0xbe, 0x3d, 0x11, 0x18, 0x1e, 0x1e, 0xc7, 0xda, 0x85};
@@ -139,7 +137,8 @@ void setup()
   //Set ADC to read out the Battery status:
   setADC();
 
-
+  //Set LED Pins:
+  setLEDPins();
 
   Serial.begin(115200);
 
@@ -151,23 +150,26 @@ void setup()
   setESP32Time();
   delay(50);
   getESP32Time();
+  delay(50);
   storeESP32Time();
+  delay(50);
 
   setupDHT22();
-  setLEDPins();
 
-  while (!Serial)
-    ;
+
+  //while (!Serial);
 
   //Activate the LoRaWan-Module
   SPI.begin(SCK, MISO, MOSI, SS);
   Mcu.init(SS, RST_LoRa, DIO0, DIO1, license);
   deviceState = DEVICE_STATE_INIT;
-  delay(500);
+  delay(1000);
   LoRaWAN.init(loraWanClass, loraWanRegion);
-  delay(500);
+  delay(1000);
+
   LoRaWAN.join();
-  delay(500);
+  delay(1000);
+  //deviceState = DEVICE_STATE_SEND;
 
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C); //initialize with the I2C addr 0x3C (128x64)
   delay(500);
@@ -201,7 +203,7 @@ void setup()
   if (!ccs.begin())
   {
     Serial.println("Failed to start CCS811 sensor! Please check wiring.");
-    //while (1);
+    while (1);
   }
   else
   {
@@ -218,23 +220,20 @@ void setup()
     Serial.println("CCS811 started");
   }
 
-  // Wait for the sensor to be ready
-  //while (!ccs.available());
-  //calibrate temperature sensor
-
-
-
 
 }
+
+
+
 
 // The loop function is called in an endless loop
 void loop()
 {
-  
-    chipid = ESP.getEfuseMac(); //The chip ID is essentially its MAC address(length: 6 bytes).
-    Serial.printf("ESP32 Chip ID = %04X", (uint16_t)(chipid >> 32)); //print High 2 bytes
-    Serial.printf("%08X\n", (uint32_t)chipid); //print Low 4bytes.
-  
+  /*
+  chipid = ESP.getEfuseMac(); //The chip ID is essentially its MAC address(length: 6 bytes).
+  Serial.printf("ESP32 Chip ID = %04X", (uint16_t)(chipid >> 32)); //print High 2 bytes
+  Serial.printf("%08X\n", (uint32_t)chipid); //print Low 4bytes.
+ */
 
   switch (deviceState)
   {
@@ -249,13 +248,12 @@ void loop()
         loopTemperature();
         loopHumidity();
         storeESP32Time();
+
+
         if (ccs.available())
         {
           ccs.setEnvironmentalData(humidity, temp);
-
           delay(50);
-
-
 
           if (BaseLineCounter == 0)
           {
@@ -275,17 +273,11 @@ void loop()
           Serial.print("[Loop]:Baseline-Counter:");
           Serial.println(BaseLineCounter);
           Serial.println("------------------");
-
-
-
           delay(500);
 
           if (!ccs.readData())
           {
-
-            // ---------------------------
             display.clearDisplay();
-
             display.setTextSize(1);
             display.setCursor(0, 0);
             display.print("Temperatur");
@@ -328,14 +320,17 @@ void loop()
               if ( i <= 15 && i < next ) {
                 if (i <= 15 ) {
                   messurmentCo2 = ccs.geteCO2();
+                  delay(150);
                   AverageC02Value =  ((AverageC02Value + messurmentCo2) / 2);
-                  delay(500);
-                  AverageC02Value;
+                  delay(400);
                   Serial.print("CO2-Average stored with Value of ");
                   Serial.print(AverageC02Value);
-                  Serial.println("ppm");
+                  Serial.print("/");
+                  Serial.print(messurmentCo2);
+                  Serial.println(" ppm");
                   delay(500);
                 }
+
                 if (i > 15 && i < next) {
                   int timeleft = next - i;
                   Serial.println("-----------");
@@ -344,7 +339,6 @@ void loop()
                   Serial.println("-----------");
                   delay(1002);
                 }
-
               }
 
               if ( i == next) {
@@ -357,7 +351,6 @@ void loop()
                 Serial.print(Co2);
                 Serial.println("ppm");
               }
-
             }
 
 
@@ -378,7 +371,6 @@ void loop()
             display.print("PPM");
 
             display.display();
-
             delay(2000);
           }
           else
@@ -392,6 +384,7 @@ void loop()
             while (1);
           }
         }
+
         prepareTxFrame(appPort);
         LoRaWAN.send(loraWanClass);
         deviceState = DEVICE_STATE_CYCLE;
@@ -404,21 +397,19 @@ void loop()
     case DEVICE_STATE_CYCLE:
       {
         // Schedule next packet transmission
-
         Serial.println("[LOOP]: State");
         storeESP32Time();
         Serial.print("State-Device:");
         Serial.println(DEVICE_STATE);
         delay(50);
-        
-        if ( DEVICE_STATE <= 5) { //5:59 will be "5" too as device state
-          
+
+        if ( DEVICE_STATE <= 5) {
+
           display.clearDisplay();
           display.display();
-          
           getESP32Time();
           activateNightSleep();
-          
+
         } else {
           txDutyCycleTime = appTxDutyCycle + randr(-APP_TX_DUTYCYCLE_RND, APP_TX_DUTYCYCLE_RND);
           LoRaWAN.cycle(txDutyCycleTime);
@@ -430,12 +421,6 @@ void loop()
       }
     case DEVICE_STATE_SLEEP:
       {
-        /*Serial.println("[LOOP]: Sleep");
-              Serial.println(txDutyCycleTime);
-              Serial.println("Restarting in 10 seconds");
-              delay(10000);
-              ESP.restart();
-        */
         LoRaWAN.sleep(loraWanClass, debugLevel);
         break;
       }

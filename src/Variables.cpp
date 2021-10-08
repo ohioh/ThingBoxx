@@ -22,6 +22,8 @@ int GREEN_PIN = 15;
 int BLUE_PIN = 32;
 int ALERT_PIN = 12 ;
 
+
+/* MODE: Production
 int red_times = 200;
 int orange_times = 2;
 int green_times = 2;
@@ -34,6 +36,21 @@ int orange_ms = 500000;
 int green_ms = 500000;
 int blue_ms = 1000;
 int alert_ms = 500000;
+int white_ms = 1000;
+*/
+
+int red_times = 20;
+int orange_times = 2;
+int green_times = 2;
+int blue_times = 1;
+int alert_times = 10;
+int white_times = 10;
+
+int red_ms = 500;
+int orange_ms = 5000;
+int green_ms = 5000;
+int blue_ms = 1000;
+int alert_ms = 5000;
 int white_ms = 1000;
 
 
