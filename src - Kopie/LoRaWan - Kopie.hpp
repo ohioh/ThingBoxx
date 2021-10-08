@@ -1,6 +1,12 @@
 /*##########################################################################################################
     LoRaWan.hpp
     Link:
+
+
+
+
+
+
    ########################################################################################################
 */
 #ifndef LORAWAN_HPP
@@ -10,7 +16,6 @@
 
 #include <stdlib.h>
 #include <stdint.h>
-#include "variables.hpp"
 
 void decToBinary(int input);
 void zennerParserPrepair();

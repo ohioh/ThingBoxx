@@ -1,6 +1,6 @@
 /*##########################################################################################################
- *  Sleep.hpp
- *  Link: https://randomnerdtutorials.com/esp32-deep-sleep-arduino-ide-wake-up-sources/
+ * 
+ *  Link: https://github.com/HelTecAutomation/Heltec_ESP32/blob/master/src/heltec.h
  * 
  * 
  * 
@@ -9,10 +9,8 @@
  * 
  * ########################################################################################################
  */
-#ifndef SLEEP_HPP
-#define SLEEP_HPP
+ 
+#include "HELTEC.hpp"
+#include "Variables.hpp"
 
-void activateNightSleep();
-void activateDeepSleep(uint16_t time2sleep);
-
-#endif
+#include <Arduino.h>

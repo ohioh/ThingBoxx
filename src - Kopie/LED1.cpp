@@ -12,14 +12,13 @@
 // reference: https://www.arduino.cc/reference/de/language/functions/digital-io/pinmode/
 // reference: https://www.arduino.cc/reference/de/language/functions/analog-io/analogwrite/
 
-#include "LED.hpp"
-#include "Variables.hpp"
-#include "EEPROM.hpp"
-
 #include <Arduino.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <cstddef>
+
+#include "LED1.hpp"
+#include "Variables.hpp"
 
 TaskHandle_t redAlertBlinkCore;
 TaskHandle_t redLEDBlinkCore;
@@ -37,19 +36,24 @@ void setLEDPins()
   pinMode(GREEN_PIN, OUTPUT); // Setzt den Digitalpin Outputpin
   pinMode(BLUE_PIN, OUTPUT); // Setzt den Digitalpin Outputpin
   pinMode(ALERT_PIN, OUTPUT);
+  digitalWrite(RED_PIN, HIGH);
+  digitalWrite(GREEN_PIN, HIGH);
+  digitalWrite(BLUE_PIN, HIGH);
+
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 void blinkRedLED(void * pvParameters) {
-
+  digitalWrite(GREEN_PIN, HIGH);
+  digitalWrite(BLUE_PIN, HIGH);
   String taskMessage = "Task running on core ";
   taskMessage = taskMessage + xPortGetCoreID();
   Serial.println(taskMessage);  //log para o serial monitor
   for (byte i = 0; i < red_times; i++) {
-    digitalWrite(RED_PIN, HIGH);   // turn the LED on (HIGH is the voltage level)
+    digitalWrite(RED_PIN, LOW);   // turn the LED on (HIGH is the voltage level)
     delay(red_ms);                       // wait for a second
-    digitalWrite(RED_PIN, LOW);    // turn the LED off by making the voltage LOW
+    digitalWrite(RED_PIN, HIGH);    // turn the LED off by making the voltage LOW
     delay(850);                       // wait for a second
   }
   vTaskDelete(NULL);
@@ -67,23 +71,24 @@ void blinkRED()
     NULL,            // Parameter to pass
     2,               // Task priority
     &redLEDBlinkCore, // Task handle
-    1);         //CORE
+    0);         //CORE
 
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 void blinkRedALERT(void * pvParameters) {
-
+  digitalWrite(GREEN_PIN, HIGH);
+  digitalWrite(BLUE_PIN, HIGH);
   String taskMessage = "Task running on core ";
   taskMessage = taskMessage + xPortGetCoreID();
   Serial.println(taskMessage);  //log para o serial monitor
   pinMode(ALERT_PIN, OUTPUT);
   Serial.println("Alert-Signal -> ");
   for (uint16_t i = 0 ; i < alert_times; i++) {
-    digitalWrite(ALERT_PIN, HIGH);   // turn the LED on (HIGH is the voltage level)
-    delay(alert_ms);
     digitalWrite(ALERT_PIN, LOW);   // turn the LED on (HIGH is the voltage level)
+    delay(alert_ms);
+    digitalWrite(ALERT_PIN, HIGH);   // turn the LED on (HIGH is the voltage level)
     delay(alert_ms);
   }
   vTaskDelete(NULL);
@@ -121,9 +126,11 @@ void blinkLEDBuildin()
 void blinkGREEN()
 {
   for (uint16_t i = 0; i < green_times; i++) {
-    digitalWrite(GREEN_PIN, HIGH);   // turn the LED on (HIGH is the voltage level)
+    digitalWrite(RED_PIN, HIGH);
+    digitalWrite(BLUE_PIN, HIGH);
+    digitalWrite(GREEN_PIN, LOW);   // turn the LED on (HIGH is the voltage level)
     delay(green_ms);                       // wait for a second
-    digitalWrite(GREEN_PIN, LOW);    // turn the LED off by making the voltage LOW
+    digitalWrite(GREEN_PIN, HIGH);    // turn the LED off by making the voltage LOW
     delay(50);                       // wait for a second
   }
 }
@@ -133,9 +140,11 @@ void blinkGREEN()
 void blinkBLUE()
 {
   for (uint16_t i = 0; i < blue_times; i++) {
-    digitalWrite(BLUE_PIN, HIGH);   // turn the LED on (HIGH is the voltage level)
+    digitalWrite(RED_PIN, HIGH);
+    digitalWrite(GREEN_PIN, HIGH);
+    digitalWrite(BLUE_PIN, LOW);   // turn the LED on (HIGH is the voltage level)
     delay(blue_ms);                       // wait for a second
-    digitalWrite(BLUE_PIN, LOW);    // turn the LED off by making the voltage LOW
+    digitalWrite(BLUE_PIN, HIGH);    // turn the LED off by making the voltage LOW
     delay(50);                       // wait for a second
   }
 }
@@ -145,13 +154,13 @@ void blinkBLUE()
 void blinkWHITE()
 {
   for (byte i = 0; i < white_times; i++) {
-    digitalWrite(RED_PIN, HIGH);   // turn the LED on (HIGH is the voltage level)
-    digitalWrite(GREEN_PIN, HIGH);   // turn the LED on (HIGH is the voltage level)
-    digitalWrite(BLUE_PIN, HIGH);   // turn the LED on (HIGH is the voltage level)
+    digitalWrite(RED_PIN, LOW);   // turn the LED on (HIGH is the voltage level)
+    digitalWrite(GREEN_PIN, LOW);   // turn the LED on (HIGH is the voltage level)
+    digitalWrite(BLUE_PIN, LOW);   // turn the LED on (HIGH is the voltage level)
     delay(white_ms);                       // wait for a second
-    digitalWrite(RED_PIN, LOW);    // turn the LED off by making the voltage LOW
-    digitalWrite(GREEN_PIN, LOW);    // turn the LED off by making the voltage LOW
-    digitalWrite(BLUE_PIN, LOW);    // turn the LED off by making the voltage LOW
+    digitalWrite(RED_PIN, HIGH);    // turn the LED off by making the voltage LOW
+    digitalWrite(GREEN_PIN, HIGH);    // turn the LED off by making the voltage LOW
+    digitalWrite(BLUE_PIN, HIGH);    // turn the LED off by making the voltage LOW
     delay(white_ms);                       // wait for a second
   }
 }
@@ -173,7 +182,7 @@ void blinkORANGE()
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-void mainCO22Signal(int averageCO2){
+void mainCO22Signal(int averageCO2) {
   if (averageCO2 <= 750 && averageCO2 > 0 ) {
     blinkGREEN();
     delay(50);
@@ -187,6 +196,6 @@ void mainCO22Signal(int averageCO2){
     blinkGREEN();
     delay(50);
   }
-  
-  
+
+
 }

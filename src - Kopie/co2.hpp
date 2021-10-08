@@ -1,15 +1,14 @@
 //########################################################################################################
-//  REBOOT.cpp
+//  co2.hpp
 //  
 //
 //########################################################################################################
-#include "REBOOT.hpp"
-#include <Arduino.h>
+#ifndef CO2_HPP
+#define CO2_HPP
 
-void rebootESP32(int timeToReboot) {
-  Serial.println("Restarting in 10 seconds");
+#pragma once
 
-  delay(timeToReboot);
+void setupCO2();
+int loopCO2(); 
 
-  ESP.restart();
-}
+#endif

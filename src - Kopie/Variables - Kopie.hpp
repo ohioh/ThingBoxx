@@ -1,4 +1,5 @@
-/*##########################################################################################################
+/*
+##########################################################################################################
  *  Variables.hpp
  *  Link: 
  * 
@@ -18,6 +19,7 @@
 #include <stdint.h>
 #include <cstddef>
 
+//LED-Variables
 extern int RED_PIN;
 extern int GREEN_PIN;
 extern int BLUE_PIN;
@@ -37,17 +39,12 @@ extern int blue_ms;
 extern int alert_ms;
 extern int white_ms;
 
-
 //EEPROM-Adressen
 extern int Battery_Address;
 extern int BatteryValue;
-extern uint16_t ADCValue;
 extern int CO2_Address;
 extern int DEVICE_STATE_ADDRESS;
-extern uint16_t DEVICE_STATE;
-extern int temp;
-extern int humidity;
-extern int Co2;
+extern int DEVICE_STATE;
 
 //LORAWAN-Variables
 
@@ -63,7 +60,8 @@ extern unsigned int binaryNum[];
 extern uint16_t binPlatformData; //for integer values till to 65535
 
 // -> void prepareTxFrame(uint8_t port):
-
+extern int averageCO2;
+extern int averageCO2Store;
 
 
 #endif

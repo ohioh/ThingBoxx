@@ -1,5 +1,5 @@
-#ifndef EEPROM_HPP
-#define EEPROM_HPP
+#ifndef STORAGE_HPP
+#define STORAGE_HPP
 
 
 int read_int(int address);

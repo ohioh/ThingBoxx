@@ -1,13 +1,4 @@
-//########################################################################################################
-//  DHT22.cpp
-//  
-//
-//########################################################################################################
 #include "DHT22.hpp"
-#include <Adafruit_Sensor.h>
-#include <DHT.h>
-#include <DHT_U.h>
-#include "Variables.hpp"
 
 // DHT Temperature & Humidity Sensor
 // Unified Sensor Library Example
@@ -18,7 +9,9 @@
 // - DHT Sensor Library: https://github.com/adafruit/DHT-sensor-library
 // - Adafruit Unified Sensor Lib: https://github.com/adafruit/Adafruit_Sensor
 
-
+#include <Adafruit_Sensor.h>
+#include <DHT.h>
+#include <DHT_U.h>
 
 #define DHTPIN 33    // Digital pin connected to the DHT sensor 
 // Feather HUZZAH ESP8266 note: use pins 3, 4, 5, 12, 13 or 14 --
@@ -39,7 +32,7 @@ uint32_t delayMS;
 void setupDHT22() {
   // Initialize device.
   dht.begin();
-  Serial.println(F("DHT22 Unified Sensor"));
+  Serial.println(F("DHTxx Unified Sensor Example"));
   // Print temperature sensor details.
   sensor_t sensor;
   dht.temperature().getSensor(&sensor);
@@ -69,7 +62,7 @@ void setupDHT22() {
 int loopTemperature() {
   // Delay between measurements.
   delay(delayMS);
-  
+  int temp = 0;
   // Get temperature event and print its value.
   sensors_event_t event;
   dht.temperature().getEvent(&event);
@@ -89,7 +82,7 @@ int loopTemperature() {
 int loopHumidity() {
   // Delay between measurements.
   delay(delayMS);
-  
+  int hum = 0;
   // Get temperature event and print its value.
   sensors_event_t event;
   // Get humidity event and print its value.
@@ -99,10 +92,10 @@ int loopHumidity() {
   }
   else {
     Serial.print(F("Humidity: "));
-    humidity = event.relative_humidity;
-    Serial.print(humidity);
+    hum = event.relative_humidity;
+    Serial.print(hum);
     Serial.println(F("%"));
   }
 
-  return (humidity);
+  return (hum);
 }
