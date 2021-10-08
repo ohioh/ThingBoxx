@@ -12,7 +12,7 @@
 #ifndef SLEEP_HPP
 #define SLEEP_HPP
 
-void setDeepSleepTime();
-void activateDeepSleep();
+void activateNightSleep();
+void activateDeepSleep(uint16_t time2sleep);
 
 #endif

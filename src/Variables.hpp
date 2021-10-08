@@ -44,7 +44,7 @@ extern int BatteryValue;
 extern uint16_t ADCValue;
 extern int CO2_Address;
 extern int DEVICE_STATE_ADDRESS;
-extern int DEVICE_STATE;
+extern uint16_t DEVICE_STATE;
 extern int temp;
 extern int humidity;
 extern int Co2;

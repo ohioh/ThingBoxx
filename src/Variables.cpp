@@ -30,10 +30,10 @@ int alert_times = 100;
 int white_times = 10;
 
 int red_ms = 500;
-int orange_ms = 10000;
-int green_ms = 10000;
+int orange_ms = 500000;
+int green_ms = 500000;
 int blue_ms = 1000;
-int alert_ms = 500;
+int alert_ms = 500000;
 int white_ms = 1000;
 
 
@@ -48,7 +48,7 @@ int BatteryValue = 95;
 uint16_t ADCValue = 0;
 int CO2_Address = 90;
 int DEVICE_STATE_ADDRESS = 25;
-int DEVICE_STATE = 77;
+uint16_t DEVICE_STATE = 77;
 int temp;
 int humidity;
 int Co2;

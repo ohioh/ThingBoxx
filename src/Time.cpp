@@ -6,6 +6,7 @@
 #include "Time.hpp"
 #include <ESP32Time.h>
 #include "Storage.hpp"
+#include "Variables.hpp"
 
 #include <stdlib.h>
 #include <string.h>
@@ -19,8 +20,9 @@ RTC_DATA_ATTR int RTC_Time_set = 0;
 void setESP32Time()
 {
   if ( RTC_Time_set == 0 ) {
-    //RTC_Time  = rtc.setTime(30, 38, 15, 07, 10, 2021); // 17th Jan 2021 15:24:30
-    rtc.setTime(1609459200);  // 1st Jan 2021 00:00:00
+    rtc.setTime(30, 50, 7, 8, 10, 2021); // 17th Jan 2021 15:24:30
+
+    //rtc.setTime(1609459200);  // 1st Jan 2021 00:00:00
     Serial.println("---------------");                            //  (String) 15:24:38
     Serial.println("Set time to:");                            //  (String) 15:24:38
     RTC_Time_set = 1;
@@ -39,7 +41,15 @@ void getESP32Time()
 
 void storeESP32Time()
 {
+  Serial.println("---------------");
   Serial.println("Write Time to non-volatiy Storage"); //  (String) 15:24:38
-  Serial.println(RTC_Time);                            //  (String) 15:24:38
-   rtc.getTime();
+  
+  DEVICE_STATE = rtc.getHour(true);
+  
+  Serial.print("Full Hour: ");
+  Serial.println(DEVICE_STATE);
+  Serial.println("---------------");
+  Serial.print("Full Time: ");
+  Serial.println(rtc.getTime());
+  Serial.println("---------------");
 }

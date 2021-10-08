@@ -41,7 +41,8 @@ void setLEDPins()
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 void blinkRedLED(void * pvParameters) {
-
+  digitalWrite(GREEN_PIN, LOW);
+  digitalWrite(BLUE_PIN, LOW);
   String taskMessage = "Task running on core ";
   taskMessage = taskMessage + xPortGetCoreID();
   Serial.println(taskMessage);  //log para o serial monitor
@@ -66,14 +67,15 @@ void blinkRED()
     NULL,            // Parameter to pass
     2,               // Task priority
     &redLEDBlinkCore, // Task handle
-    1);         //CORE
+    0);         //CORE
 
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 void blinkRedALERT(void * pvParameters) {
-
+  digitalWrite(GREEN_PIN, LOW);
+  digitalWrite(BLUE_PIN, LOW);
   String taskMessage = "Task running on core ";
   taskMessage = taskMessage + xPortGetCoreID();
   Serial.println(taskMessage);  //log para o serial monitor
@@ -120,6 +122,8 @@ void blinkLEDBuildin()
 void blinkGREEN()
 {
   for (uint16_t i = 0; i < green_times; i++) {
+    digitalWrite(RED_PIN, LOW);
+    digitalWrite(BLUE_PIN, LOW);
     digitalWrite(GREEN_PIN, HIGH);   // turn the LED on (HIGH is the voltage level)
     delay(green_ms);                       // wait for a second
     digitalWrite(GREEN_PIN, LOW);    // turn the LED off by making the voltage LOW
@@ -132,6 +136,8 @@ void blinkGREEN()
 void blinkBLUE()
 {
   for (uint16_t i = 0; i < blue_times; i++) {
+    digitalWrite(RED_PIN, LOW);
+    digitalWrite(GREEN_PIN, LOW);
     digitalWrite(BLUE_PIN, HIGH);   // turn the LED on (HIGH is the voltage level)
     delay(blue_ms);                       // wait for a second
     digitalWrite(BLUE_PIN, LOW);    // turn the LED off by making the voltage LOW
@@ -172,7 +178,7 @@ void blinkORANGE()
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-void mainCO22Signal(int averageCO2){
+void mainCO22Signal(int averageCO2) {
   if (averageCO2 <= 750 && averageCO2 > 0 ) {
     blinkGREEN();
     delay(50);
@@ -186,6 +192,6 @@ void mainCO22Signal(int averageCO2){
     blinkGREEN();
     delay(50);
   }
-  
-  
+
+
 }
