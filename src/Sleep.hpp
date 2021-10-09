@@ -12,7 +12,7 @@
 #ifndef SLEEP_HPP
 #define SLEEP_HPP
 
-
+void checkReboot();
 void activateDeepSleep();
 void setNextSleepTime();
 void controllSleepTime();

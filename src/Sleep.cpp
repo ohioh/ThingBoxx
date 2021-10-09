@@ -25,17 +25,36 @@ int actualTime = 0;
 TaskHandle_t sleepControllHandle;
 RTC_DATA_ATTR int nextSleepTime = 0;
 RTC_DATA_ATTR int sleepTimeSet = 0 ;
+RTC_DATA_ATTR int needReboot = 0 ;
+
+
+
+void checkReboot()
+{
+  if ( needReboot == 1) {
+    Serial.println("----------------");
+    Serial.println("Restarting in 3 seconds");
+    Serial.println("----------------");
+    needReboot = 0;
+    delay(3000);
+    ESP.restart();
+  } else {
+    Serial.println("----------------");
+    Serial.println("No reboot needed");
+    Serial.println("----------------");
+  }
+}
 
 
 void activateDeepSleep()
 {
   sleepTimeSet = 0;
   esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
-  Serial.println("Setup ESP32 to sleep for every " + String(TIME_TO_SLEEP) +
+  Serial.println("Setup ESP32 to sleep for " + String(TIME_TO_SLEEP) +
                  " Seconds");
 
   Serial.println("Going to sleep now");
-  Serial.println("_________________");
+  Serial.println("--------------------");
   delay(1000);
   Serial.flush();
   esp_deep_sleep_start();
@@ -51,8 +70,7 @@ void setNextSleepTime() {
   Serial.print(nextSleepTime);
   Serial.print(" and sleepTimeSet is ");
   Serial.println(sleepTimeSet);
-  Serial.println("_________________");
-
+  Serial.println("--------------------");
 }
 
 
@@ -61,21 +79,29 @@ void controllSleepTime(void *pvParameters) {
     actualTime = getESP32Time();
     delay(5000);
     if ( actualTime < nextSleepTime && sleepTimeSet == 1 ) {
-      Serial.print("No keine Schlafenszeit:Waiting ");
+      Serial.println("--------------------");
+      Serial.print("No keine Schlafenszeit.Waiting for ");
       int leftTime = nextSleepTime - actualTime;
       Serial.print(leftTime);
-      Serial.println("_________________");
+      Serial.println("--------------------");
+      checkReboot();
     } else if (actualTime >= nextSleepTime && sleepTimeSet == 1) {
+      Serial.println("--------------------");
       Serial.println("Schlafenszeit");
-      Serial.println("_________________");
+      Serial.println("--------------------");
+      needReboot = 1;
       activateDeepSleep();
     } else if ( sleepTimeSet == 0) {
       setNextSleepTime();
     } else {
+      Serial.println("--------------------");
       Serial.println("Gar Nichts?");
-      Serial.println("_________________");
+      Serial.println("--------------------");
+      checkReboot();
     }
+    
   }
+  
   yield();
 
 }
