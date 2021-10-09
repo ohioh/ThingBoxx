@@ -6,11 +6,18 @@
     Variables which has to be non-volatily are handled in Storage.cpp
    ########################################################################################################
 */
+#include "Arduino.h"
 #include "Variables.hpp"
 
 #include <stdlib.h>
 #include <stdint.h>
 #include <cstddef>
+
+
+
+
+bool messurmentDone = false;
+//int AverageC02Value = 400;
 
 //////////////////////////////////////////////---LED-VARIABLES---///////////////////////////////////////////////////////////////////
 //

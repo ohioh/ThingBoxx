@@ -10,7 +10,7 @@
 
 
 void setESP32Time();
-void getESP32Time();
+int getESP32Time();
 void storeESP32Time();
 
 #endif

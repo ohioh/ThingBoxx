@@ -167,7 +167,7 @@ void prepareTxFrame(uint8_t port)
   appData[1] = binPlatformData;   //battery
   delay(500);
   
-  decToBinary(Co2);
+  decToBinary(AverageC02Value);
   delay(50);
   zennerParserPrepair();
   delay(50);

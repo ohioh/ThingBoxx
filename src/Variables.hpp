@@ -18,6 +18,9 @@
 #include <stdint.h>
 #include <cstddef>
 
+extern bool messurmentDone;
+extern int AverageC02Value;
+
 extern int RED_PIN;
 extern int GREEN_PIN;
 extern int BLUE_PIN;

@@ -34,18 +34,22 @@ void setESP32Time()
 
 }
 
-void getESP32Time()
+int getESP32Time()
 {
+  
+  int actualtime = rtc.getEpoch();
   Serial.println(rtc.getTime()); //  (String) 15:24:38
+  Serial.println(actualtime); //  (String) 15:24:38
+  return (actualtime);
 }
 
 void storeESP32Time()
 {
   Serial.println("---------------");
   Serial.println("Write Time to non-volatiy Storage"); //  (String) 15:24:38
-  
+
   DEVICE_STATE = rtc.getHour(true);
-  
+
   Serial.print("Full Hour: ");
   Serial.println(DEVICE_STATE);
   Serial.println("---------------");

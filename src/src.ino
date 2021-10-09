@@ -42,6 +42,7 @@
 #include <Adafruit_SSD1306.h>
 
 #include "Variables.hpp"
+#include "co2.hpp"
 #include "LED1.hpp"
 #include "DHT22.hpp"
 #include "Battery.hpp"
@@ -55,7 +56,7 @@
 #define OLED_RESET -1    // Reset pin # (or -1 if sharing Arduino reset pin)
 
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
-Adafruit_CCS811 ccs;
+//Adafruit_CCS811 ccs;
 uint64_t chipid;
 
 RTC_DATA_ATTR int BaseLineCounter = 0;
@@ -65,6 +66,16 @@ RTC_DATA_ATTR int BaseLineCounter = 0;
 
 //Development
 RTC_DATA_ATTR uint16_t nightTime = 2000;
+
+TaskHandle_t  activeLoRaWanHandler ;
+
+#define uS_TO_S_FACTOR 1000000  /* Conversion factor for micro seconds to seconds */
+#define TIME_TO_SLEEP  5        /* Time ESP32 will go to sleep (in seconds) */
+
+RTC_DATA_ATTR int bootCount = 0;
+
+
+
 /*---------------------------------------------------------------------------------------------------*/
 
 /* ABP para*/
@@ -125,10 +136,98 @@ uint8_t debugLevel = LoRaWAN_DEBUG_LEVEL;
 
 /*LoraWan region, select in arduino IDE tools*/
 LoRaMacRegion_t loraWanRegion = ACTIVE_REGION;
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int count = 1;
-int AverageC02Value = 400;
-int messurmentCo2 = 400;
+#define LEDPin 12 //LED light
+void flashLED(uint8_t data, int ledPin)
+{
+  // lora_printf("data:%d\r\n",data);
+  switch (data)
+  {
+    case 49:
+      {
+        pinMode(ledPin, OUTPUT);
+        digitalWrite(ledPin, HIGH);
+        break;
+      }
+    case 50:
+      {
+        pinMode(ledPin, OUTPUT);
+        digitalWrite(ledPin, LOW);
+        break;
+      }
+    case 51:
+      {
+        break;
+      }
+    default:
+      {
+        break;
+      }
+  }
+}
+
+void flashLED1(uint8_t data, int ledPin)
+{
+  // lora_printf("data:%d\r\n",data);
+  switch (data)
+  {
+    case 49:
+      {
+        pinMode(ledPin, OUTPUT);
+        digitalWrite(ledPin, LOW);
+        break;
+      }
+    case 50:
+      {
+        pinMode(ledPin, OUTPUT);
+        digitalWrite(ledPin, HIGH);
+        break;
+      }
+    case 51:
+      {
+        break;
+      }
+    default:
+      {
+        break;
+      }
+  }
+}
+
+/*
+  void downLinkDataHandle(McpsIndication_t *mcpsIndication)
+  {
+  lora_printf("+REV DATA:%s,RXSIZE %d,PORT %d\r\n", mcpsIndication->RxSlot ? "RXWIN2" : "RXWIN1", mcpsIndication->BufferSize, mcpsIndication->Port);
+  lora_printf("+REV DATA:");
+  flashLED(mcpsIndication->Buffer[0]);
+
+  for (uint8_t i = 0; i < mcpsIndication->BufferSize; i++)
+  {
+    lora_printf("%02X", mcpsIndication->Buffer[i]);
+  }
+  lora_printf("\r\n");
+  }
+*/
+
+
+void activeLoRaWan( void * Parameter )
+{
+  for (;;)    {
+    Serial.print("LED-Task runs on Core: ");
+    Serial.println(xPortGetCoreID());
+    yield();
+    delay (600);
+    Serial.print ("Application CPU is on core:");   Serial.println (xPortGetCoreID());   delay (500);
+    delay(1000);
+
+    flashLED1(49, 4);
+    delay(1000);
+    flashLED1(50, 4);
+    delay(1000);
+
+  }
+}
 
 // Add your initialization code here
 void setup()
@@ -156,20 +255,9 @@ void setup()
 
   setupDHT22();
 
-
   //while (!Serial);
 
-  //Activate the LoRaWan-Module
-  SPI.begin(SCK, MISO, MOSI, SS);
-  Mcu.init(SS, RST_LoRa, DIO0, DIO1, license);
-  deviceState = DEVICE_STATE_INIT;
-  delay(1000);
-  LoRaWAN.init(loraWanClass, loraWanRegion);
-  delay(1000);
 
-  LoRaWAN.join();
-  delay(1000);
-  //deviceState = DEVICE_STATE_SEND;
 
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C); //initialize with the I2C addr 0x3C (128x64)
   delay(500);
@@ -194,33 +282,30 @@ void setup()
   display.print("Initializing...");
   display.display();
   delay(1000);
-
-  //Start CCS811:
-  Serial.println("CCS811 starting...");
-
-  //TODO : Not working to set the Drive Mode
-  //ccs.setDriveMode(1);
-  if (!ccs.begin())
-  {
-    Serial.println("Failed to start CCS811 sensor! Please check wiring.");
-    while (1);
-  }
-  else
-  {
-    /**************************************************************************/
-    /*!
-        (es werden keine Messungen durchgeführt)
-        Modus 1 IAQ Messung jede Sekunde
-        Modus 2 IAQ Messung alle 10 Sekunden
-        Modus 3 IAQ Messung alle 60 Sekunden
-        Modus 4 IAQ Messung alle 250 ms
-        (es wird nicht eCO2 und TVOC berechnet)
-    */
-    /**************************************************************************/
-    Serial.println("CCS811 started");
-  }
+  display.clearDisplay();
+  display.display();
+  setupCO2();
+  delay(1000);
+  loopCO2();
+  loopSleepTimeControll();
+  /*loopCO2();
+    delay(1000);
 
 
+    xTaskCreatePinnedToCore(
+    activeLoRaWan,        // Function that should be called
+    "getCO2 Average",     // Name of the task (for debugging)
+    10000,                // Stack size (bytes)
+    NULL,                 // Parameter to pass
+    1,                    // Task priority
+    &activeLoRaWanHandler, // Task handle
+    1); //Core
+  */
+  Serial.println("Waiting for messurment:");
+  //Activate the LoRaWan-Module
+  SPI.begin(SCK, MISO, MOSI, SS);
+  Mcu.init(SS, RST_LoRa, DIO0, DIO1, license);
+  deviceState = DEVICE_STATE_INIT;
 }
 
 
@@ -230,205 +315,54 @@ void setup()
 void loop()
 {
   /*
-  chipid = ESP.getEfuseMac(); //The chip ID is essentially its MAC address(length: 6 bytes).
-  Serial.printf("ESP32 Chip ID = %04X", (uint16_t)(chipid >> 32)); //print High 2 bytes
-  Serial.printf("%08X\n", (uint32_t)chipid); //print Low 4bytes.
- */
-
-  switch (deviceState)
+    chipid = ESP.getEfuseMac(); //The chip ID is essentially its MAC address(length: 6 bytes).
+    Serial.printf("ESP32 Chip ID = %04X", (uint16_t)(chipid >> 32)); //print High 2 bytes
+    Serial.printf("%08X\n", (uint32_t)chipid); //print Low 4bytes.
+  */
+  switch ( deviceState )
   {
+    case DEVICE_STATE_INIT:
+      {
+        LoRaWAN.init(loraWanClass, loraWanRegion);
+        break;
+      }
+    case DEVICE_STATE_JOIN:
+      {
+        LoRaWAN.join();
+        break;
+      }
     case DEVICE_STATE_SEND:
       {
-        //Read Voltage of pin
-        //ReadVoltage(13);
-        readADC();
-
-        //read DHT22
-
-        loopTemperature();
-        loopHumidity();
-        storeESP32Time();
-
-
-        if (ccs.available())
-        {
-          ccs.setEnvironmentalData(humidity, temp);
-          delay(50);
-
-          if (BaseLineCounter == 0)
-          {
-            Serial.println("Set new Baseline [1]");
-            uint16_t Baseline = ccs.getBaseline();
-            ccs.setBaseline(Baseline);
-          }
-          else if (BaseLineCounter == 30)
-          {
-            Serial.println("Set new Baseline [30]");
-            uint16_t Baseline = ccs.getBaseline();
-            ccs.setBaseline(Baseline);
-            BaseLineCounter = 0;
-          }
-          BaseLineCounter++;
-
-          Serial.print("[Loop]:Baseline-Counter:");
-          Serial.println(BaseLineCounter);
-          Serial.println("------------------");
-          delay(500);
-
-          if (!ccs.readData())
-          {
-            display.clearDisplay();
-            display.setTextSize(1);
-            display.setCursor(0, 0);
-            display.print("Temperatur");
-
-            display.setTextSize(5);
-            display.setCursor(20, 20);
-            display.print(temp);
-
-            display.setTextSize(5);
-            display.setCursor(87, 20);
-            display.print("C");
-            display.display();
-            delay(2000);
-
-            // ---------------------------
-            display.clearDisplay();
-
-            display.setTextSize(1);
-            display.setCursor(0, 0);
-            display.print("Luftfeuchtigkeit");
-
-            display.setTextSize(5);
-            display.setCursor(20, 20);
-            display.print(humidity);
-
-            display.setTextSize(5);
-            display.setCursor(85, 20);
-            display.print("%");
-            display.display();
-            delay(2000);
-
-            // ---------------------------
-            Serial.print("CO2: ");
-            //ccs.setDriveMode(1);
-            delay(1000);
-            int next = 65;
-
-            for ( int i = 0; i <= next; i++) {
-
-              if ( i <= 15 && i < next ) {
-                if (i <= 15 ) {
-                  messurmentCo2 = ccs.geteCO2();
-                  delay(150);
-                  AverageC02Value =  ((AverageC02Value + messurmentCo2) / 2);
-                  delay(400);
-                  Serial.print("CO2-Average stored with Value of ");
-                  Serial.print(AverageC02Value);
-                  Serial.print("/");
-                  Serial.print(messurmentCo2);
-                  Serial.println(" ppm");
-                  delay(500);
-                }
-
-                if (i > 15 && i < next) {
-                  int timeleft = next - i;
-                  Serial.println("-----------");
-                  Serial.print("Time till next messurment: ");
-                  Serial.println(timeleft);
-                  Serial.println("-----------");
-                  delay(1002);
-                }
-              }
-
-              if ( i == next) {
-                messurmentCo2 = ccs.geteCO2();
-                delay(2000);
-                AverageC02Value =  ((AverageC02Value + messurmentCo2) / 2);
-                delay(50);
-                Co2 = AverageC02Value;
-                Serial.print("CO2-Average stored with Value of ");
-                Serial.print(Co2);
-                Serial.println("ppm");
-              }
-            }
-
-
-            Serial.print("TVOC: ");
-            Serial.println(ccs.getTVOC());
-
-            display.clearDisplay();
-            display.setTextSize(2);
-            display.setCursor(0, 0);
-            display.print("CO2:");
-
-            display.setTextSize(5);
-            display.setCursor(5, 20);
-            display.print(Co2);
-
-            display.setTextSize(1);
-            display.setCursor(110, 57);
-            display.print("PPM");
-
-            display.display();
-            delay(2000);
-          }
-          else
-          {
-            Serial.println("ERROR!");
-            display.clearDisplay();
-            display.setTextSize(2);
-            display.setCursor(0, 5);
-            display.print("ERROR!");
-            display.display();
-            while (1);
-          }
-        }
-
-        prepareTxFrame(appPort);
+        prepareTxFrame( appPort );
         LoRaWAN.send(loraWanClass);
         deviceState = DEVICE_STATE_CYCLE;
-        delay(1000);
-        Serial.println("Set LEDS");
-        mainCO22Signal(Co2);
-        delay(1000);
         break;
       }
     case DEVICE_STATE_CYCLE:
       {
         // Schedule next packet transmission
-        Serial.println("[LOOP]: State");
-        storeESP32Time();
-        Serial.print("State-Device:");
-        Serial.println(DEVICE_STATE);
-        delay(50);
-
-        if ( DEVICE_STATE <= 5) {
-
-          display.clearDisplay();
-          display.display();
-          getESP32Time();
-          activateNightSleep();
-
-        } else {
-          txDutyCycleTime = appTxDutyCycle + randr(-APP_TX_DUTYCYCLE_RND, APP_TX_DUTYCYCLE_RND);
-          LoRaWAN.cycle(txDutyCycleTime);
-        }
-
+        txDutyCycleTime = appTxDutyCycle + randr( -APP_TX_DUTYCYCLE_RND, APP_TX_DUTYCYCLE_RND ) ;
+        Serial.print(" DUTY:");
+        Serial.println(txDutyCycleTime);
+        LoRaWAN.cycle(txDutyCycleTime);
         deviceState = DEVICE_STATE_SLEEP;
-        delay(1000);
         break;
       }
     case DEVICE_STATE_SLEEP:
       {
+        
         LoRaWAN.sleep(loraWanClass, debugLevel);
         break;
       }
     default:
       {
-        Serial.println("[LOOP]: default");
         deviceState = DEVICE_STATE_INIT;
         break;
       }
   }
+
+  //ESP.restart();
+  /*
+  */
+
 }

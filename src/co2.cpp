@@ -24,72 +24,85 @@
 
 ******************************************************************************/
 #include <Arduino.h>
-#include <Wire.h>
+#include <Adafruit_CCS811.h>
+#include "Variables.hpp"
 
-#include "SparkFunCCS811.h" //Click here to get the library: http://librarymanager/All#SparkFun_CCS811
 
-#define CCS811_ADDR 0x5A //Default I2C Address
-//#define CCS811_ADDR 0x5A //Alternate I2C Address
+Adafruit_CCS811 ccs;
 
-CCS811 mySensor(CCS811_ADDR);
+int count = 1;
 
+int messurmentCo2 = 400;
+
+TaskHandle_t getCo2AverageHandle;
+RTC_DATA_ATTR int AverageC02Value = 400;
 
 void setupCO2()
 {
 
-  Serial.println("CCS811 Basic Example");
+  Serial.print("Messurment done: ");
+  Serial.println(messurmentDone);
 
-  //Wire.begin(); //Inialize I2C Hardware
+  //Start CCS811:
+  Serial.println("CCS811 starting...");
 
-  if (mySensor.begin() == false)
+  //TODO : Not working to set the Drive Mode
+  //ccs.setDriveMode(1);
+  if (!ccs.begin())
   {
-    Serial.print("CCS811 error. Please check wiring. Freezing...");
-    while (1)
-      ;
+    Serial.println("Failed to start CCS811 sensor! Please check wiring.");
   }
-  Serial.println("CCS811 SETUP done");
+  else
+  {
+    /**************************************************************************/
+    /*!
+        (es werden keine Messungen durchgeführt)
+        Modus 1 IAQ Messung jede Sekunde
+        Modus 2 IAQ Messung alle 10 Sekunden
+        Modus 3 IAQ Messung alle 60 Sekunden
+        Modus 4 IAQ Messung alle 250 ms
+        (es wird nicht eCO2 und TVOC berechnet)
+    */
+    /**************************************************************************/
+    Serial.println("CCS811 started");
+  }
 }
 
-int loopCO2()
+void getCO2Average(void *pvParameters)
 {
-  Serial.println("CCS811 LOOP");
-  int co2 = 0;
-  //setupCO2();
-  delay(1000);
-  //Check to see if data is ready with .dataAvailable()
-  if (mySensor.dataAvailable())
-  {
-    //If so, have the sensor read and calculate the results.
-    //Get them later
-    mySensor.readAlgorithmResults();
-
-    Serial.print("CO2[");
-    //Returns calculated CO2 reading
-    for ( int i = 0; i <= 60; i++) {
-      if ( i >= 30 ) {
-        Serial.println("Start Messurment");
-        co2 = (co2 + mySensor.getCO2()) / 2;
-        Serial.println(co2);
-        delay(1000);
-      } else {
-        Serial.println(mySensor.getCO2());
-        delay(1000);
+  for (;;)    {
+    Serial.print("getCO2Average-Task runs on Core: ");
+    Serial.print(xPortGetCoreID());
+    Serial.print(" with  ");
+    if (ccs.available()) {
+      if (!ccs.readData()) {
+        Serial.print(" CO2: ");
+        AverageC02Value = ((AverageC02Value + ccs.geteCO2())/2);
+        Serial.print(AverageC02Value);
+        Serial.print(" ppm, TVOC: ");
+        Serial.println(ccs.getTVOC());
       }
-
+      else {
+        Serial.println("ERROR!");
+        while (1);
+      }
     }
-    Serial.print(mySensor.getCO2());
-    Serial.print("] tVOC[");
-    //Returns calculated TVOC reading
-    Serial.print(mySensor.getTVOC());
-    Serial.print("] millis[");
-    //Display the time since program start
-    Serial.print(millis());
-    Serial.print("]");
-    Serial.println();
-  } else {
-    Serial.println("CO2 not avaible");
+    yield();
+    delay (1000);
   }
+}
 
-  delay(100); //Don't spam the I2C bus
-  return (co2);
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void loopCO2()
+{
+  xTaskCreatePinnedToCore(
+    getCO2Average,        // Function that should be called
+    "getCO2 Average",     // Name of the task (for debugging)
+    100000,                // Stack size (bytes)
+    NULL,                 // Parameter to pass
+    1,                    // Task priority
+    &getCo2AverageHandle, // Task handle
+    1);                   //CORE
+
 }

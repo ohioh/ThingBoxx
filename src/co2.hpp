@@ -9,6 +9,6 @@
 #pragma once
 
 void setupCO2();
-int loopCO2(); 
+void loopCO2(); 
 
 #endif
