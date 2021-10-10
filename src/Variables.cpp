@@ -15,7 +15,7 @@
 
 
 
-
+int eepromActivated = 0;
 bool messurmentDone = false;
 //int AverageC02Value = 400;
 

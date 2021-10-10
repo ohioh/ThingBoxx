@@ -40,6 +40,7 @@
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+#include <EEPROM.h>//https://github.com/espressif/arduino-esp32/tree/master/libraries/EEPROM
 
 #include "Variables.hpp"
 #include "co2.hpp"
@@ -240,7 +241,8 @@ void setup()
   setLEDPins();
 
   Serial.begin(115200);
-
+  Serial.println("-------------------------------------------------------------------------------------------------------------------------");
+  Serial.println("Setup started");
   //Pin to read Battery
   //pinMode( 21, OUTPUT );
   //digitalWrite( 21, LOW );
@@ -287,6 +289,7 @@ void setup()
   setupCO2();
   delay(1000);
   loopCO2();
+  delay(1000);
   loopSleepTimeControll();
   /*loopCO2();
     delay(1000);
@@ -319,6 +322,17 @@ void loop()
     Serial.printf("ESP32 Chip ID = %04X", (uint16_t)(chipid >> 32)); //print High 2 bytes
     Serial.printf("%08X\n", (uint32_t)chipid); //print Low 4bytes.
   */
+  // TODO
+  /* 
+  int address = 90;
+  int readId;
+  readId = EEPROM.read(address); //EEPROM.get(address,readId);
+
+  if (readId == 1){
+    ESP.restart();
+  }
+  */
+ 
   switch ( deviceState )
   {
     case DEVICE_STATE_INIT:

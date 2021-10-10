@@ -18,6 +18,7 @@
 #include <stdint.h>
 #include <cstddef>
 
+extern int eepromActivated;
 extern bool messurmentDone;
 extern int AverageC02Value;
 
