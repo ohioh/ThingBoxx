@@ -66,7 +66,7 @@ void setupDHT22() {
   delayMS = sensor.min_delay / 1000;
 }
 
-int loopTemperature() {
+float loopTemperature() {
   // Delay between measurements.
   delay(delayMS);
   
@@ -86,7 +86,7 @@ int loopTemperature() {
   return (temp);
 }
 
-int loopHumidity() {
+float loopHumidity() {
   // Delay between measurements.
   delay(delayMS);
   

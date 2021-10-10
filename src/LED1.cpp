@@ -23,43 +23,83 @@
 TaskHandle_t redAlertBlinkCore;
 TaskHandle_t redLEDBlinkCore;
 
+int LED_SET = 2; // 2 Sets are avaible Version1 = 1 the Version2 = 2
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 void setLEDPins()
 {
   Serial.println("--------------------");
-  Serial.println("Activate LED Pins.");
-  Serial.println("--------------------");
+  Serial.println("Activate LED Pins:");
 
-  pinMode(LED_BUILTIN, OUTPUT);
-  pinMode(RED_PIN, OUTPUT); // Setzt den Digitalpin Outputpin
-  pinMode(GREEN_PIN, OUTPUT); // Setzt den Digitalpin Outputpin
-  pinMode(BLUE_PIN, OUTPUT); // Setzt den Digitalpin Outputpin
-  pinMode(ALERT_PIN, OUTPUT);
-  digitalWrite(RED_PIN, HIGH);
-  digitalWrite(GREEN_PIN, HIGH);
-  digitalWrite(BLUE_PIN, HIGH);
+  switch ( LED_SET )
+  {
+    case 1:
+      {
+        pinMode(LED_BUILTIN, OUTPUT);
+        pinMode(RED_PIN, OUTPUT); // Setzt den Digitalpin Outputpin
+        pinMode(GREEN_PIN, OUTPUT); // Setzt den Digitalpin Outputpin
+        pinMode(BLUE_PIN, OUTPUT); // Setzt den Digitalpin Outputpin
+        pinMode(ALERT_PIN, OUTPUT);
+        digitalWrite(RED_PIN, HIGH);
+        digitalWrite(GREEN_PIN, HIGH);
+        digitalWrite(BLUE_PIN, HIGH);
+        digitalWrite(ALERT_PIN, LOW);
+        Serial.println("SET 1 of LEDS.");
+        Serial.println("--------------------");
+        break;
+      }
+    case 2:
+      {
+        pinMode(LED_BUILTIN, OUTPUT);
+        pinMode(RED_PIN, OUTPUT); // Setzt den Digitalpin Outputpin
+        pinMode(GREEN_PIN, OUTPUT); // Setzt den Digitalpin Outputpin
+        pinMode(BLUE_PIN, OUTPUT); // Setzt den Digitalpin Outputpin
+        pinMode(ALERT_PIN, OUTPUT);
+        pinMode(LED_BUILTIN, HIGH);
+        digitalWrite(RED_PIN, LOW);
+        digitalWrite(GREEN_PIN, LOW);
+        digitalWrite(BLUE_PIN, LOW);
+        digitalWrite(ALERT_PIN, LOW);
+        Serial.println("SET 2 of LEDS.");
+        Serial.println("--------------------");
+        break;
+      }
+  }
+
 
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 void blinkRedLED(void * pvParameters) {
-  digitalWrite(GREEN_PIN, HIGH);
-  digitalWrite(BLUE_PIN, HIGH);
   String taskMessage = "Task running on core ";
   taskMessage = taskMessage + xPortGetCoreID();
   Serial.println(taskMessage);  //log para o serial monitor
-  for (byte i = 0; i < red_times; i++) {
-    digitalWrite(RED_PIN, LOW);   // turn the LED on (HIGH is the voltage level)
-    delay(red_ms);                       // wait for a second
-    digitalWrite(RED_PIN, HIGH);    // turn the LED off by making the voltage LOW
-    delay(850);                       // wait for a second
+  switch ( LED_SET )
+  {
+    case 1:
+      {
+        digitalWrite(RED_PIN, LOW);
+        digitalWrite(BLUE_PIN, HIGH);
+        digitalWrite(GREEN_PIN, HIGH);   // turn the LED on (HIGH is the voltage level)
+
+        vTaskDelete(NULL);
+        break;
+      }
+    case 2:
+      {
+        digitalWrite(RED_PIN, HIGH);
+        digitalWrite(BLUE_PIN, LOW);
+        digitalWrite(GREEN_PIN, LOW);    // turn the LED off by making the voltage LOW
+
+        vTaskDelete(NULL);
+        break;
+      }
+
   }
-  vTaskDelete(NULL);
 
 }
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 void blinkRED()
@@ -78,20 +118,42 @@ void blinkRED()
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 void blinkRedALERT(void * pvParameters) {
-  digitalWrite(GREEN_PIN, HIGH);
-  digitalWrite(BLUE_PIN, HIGH);
-  String taskMessage = "Task running on core ";
-  taskMessage = taskMessage + xPortGetCoreID();
-  Serial.println(taskMessage);  //log para o serial monitor
-  pinMode(ALERT_PIN, OUTPUT);
-  Serial.println("Alert-Signal -> ");
-  for (uint16_t i = 0 ; i < alert_times; i++) {
-    digitalWrite(ALERT_PIN, LOW);   // turn the LED on (HIGH is the voltage level)
-    delay(alert_ms);
-    digitalWrite(ALERT_PIN, HIGH);   // turn the LED on (HIGH is the voltage level)
-    delay(alert_ms);
+
+  switch ( LED_SET )
+  {
+    case 1:
+      {
+
+        digitalWrite(BLUE_PIN, HIGH);
+        digitalWrite(GREEN_PIN, HIGH);   // turn the LED on (HIGH is the voltage level)
+
+        for (int i = 0; i <= 60; i++) {
+          digitalWrite(ALERT_PIN, HIGH);
+          delay(500);
+          digitalWrite(ALERT_PIN, LOW);
+        }
+        
+        vTaskDelete(NULL);
+        break;
+      }
+    case 2:
+      {
+
+        digitalWrite(BLUE_PIN, LOW);
+        digitalWrite(GREEN_PIN, LOW);    // turn the LED off by making the voltage LOW
+
+        for (int i = 0; i <= 60; i++) {
+          digitalWrite(ALERT_PIN, HIGH);
+          delay(500);
+          digitalWrite(ALERT_PIN, LOW);
+          delay(500);
+        }
+        
+        vTaskDelete(NULL);
+        break;
+      }
+
   }
-  vTaskDelete(NULL);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -125,13 +187,28 @@ void blinkLEDBuildin()
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 void blinkGREEN()
 {
-  for (uint16_t i = 0; i < green_times; i++) {
-    digitalWrite(RED_PIN, HIGH);
-    digitalWrite(BLUE_PIN, HIGH);
-    digitalWrite(GREEN_PIN, LOW);   // turn the LED on (HIGH is the voltage level)
-    delay(green_ms);                       // wait for a second
-    digitalWrite(GREEN_PIN, HIGH);    // turn the LED off by making the voltage LOW
-    delay(50);                       // wait for a second
+
+  switch ( LED_SET )
+  {
+    case 1:
+      {
+        digitalWrite(RED_PIN, HIGH);
+        digitalWrite(BLUE_PIN, HIGH);
+        digitalWrite(GREEN_PIN, LOW);    // turn the LED off by making the voltage LOW
+        digitalWrite(ALERT_PIN, LOW);
+        break;
+      }
+    case 2:
+      {
+        digitalWrite(RED_PIN, LOW);
+        digitalWrite(BLUE_PIN, LOW);
+        digitalWrite(ALERT_PIN, LOW);
+
+        digitalWrite(GREEN_PIN, HIGH);    // turn the LED off by making the voltage LOW
+        delay(50);                       // wait for a second
+        break;
+      }
+
   }
 }
 
@@ -139,13 +216,29 @@ void blinkGREEN()
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 void blinkBLUE()
 {
-  for (uint16_t i = 0; i < blue_times; i++) {
-    digitalWrite(RED_PIN, HIGH);
-    digitalWrite(GREEN_PIN, HIGH);
-    digitalWrite(BLUE_PIN, LOW);   // turn the LED on (HIGH is the voltage level)
-    delay(blue_ms);                       // wait for a second
-    digitalWrite(BLUE_PIN, HIGH);    // turn the LED off by making the voltage LOW
-    delay(50);                       // wait for a second
+  switch ( LED_SET )
+  {
+    case 1:
+      {
+        digitalWrite(RED_PIN, HIGH);
+        digitalWrite(BLUE_PIN, HIGH);
+        digitalWrite(GREEN_PIN, HIGH);   // turn the LED on (HIGH is the voltage level)
+
+        digitalWrite(GREEN_PIN, LOW);    // turn the LED off by making the voltage LOW
+
+        break;
+      }
+    case 2:
+      {
+        digitalWrite(RED_PIN, LOW);
+        digitalWrite(BLUE_PIN, LOW);
+        digitalWrite(ALERT_PIN, LOW);
+
+        digitalWrite(GREEN_PIN, HIGH);    // turn the LED off by making the voltage LOW
+        delay(50);                       // wait for a second
+        break;
+      }
+
   }
 }
 
@@ -169,14 +262,29 @@ void blinkWHITE()
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 void blinkORANGE()
 {
-  for (byte i = 0; i < orange_times; i++) {
-    digitalWrite(RED_PIN, HIGH);   // turn the LED on (HIGH is the voltage level)
-    digitalWrite(GREEN_PIN, HIGH);   // turn the LED on (HIGH is the voltage level)
-    delay(orange_ms);
-    // wait for a second
-    digitalWrite(RED_PIN, LOW);    // turn the LED off by making the voltage LOW
-    digitalWrite(GREEN_PIN, LOW);    // turn the LED off by making the voltage LOW
-    delay(50);                       // wait for a second
+  switch ( LED_SET )
+  {
+    case 1:
+      {
+        digitalWrite(RED_PIN, LOW);
+        digitalWrite(BLUE_PIN, HIGH);
+        digitalWrite(GREEN_PIN, LOW);   // turn the LED on (HIGH is the voltage level)
+        digitalWrite(ALERT_PIN, LOW);
+
+
+        break;
+      }
+    case 2:
+      {
+        digitalWrite(RED_PIN, HIGH);
+        digitalWrite(BLUE_PIN, LOW);
+        digitalWrite(GREEN_PIN, HIGH);    // turn the LED off by making the voltage LOW
+        digitalWrite(ALERT_PIN, LOW);
+
+        delay(50);                       // wait for a second
+        break;
+      }
+
   }
 }
 

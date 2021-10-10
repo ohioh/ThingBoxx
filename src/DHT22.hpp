@@ -8,8 +8,8 @@
 
 #pragma once
 
-int loopTemperature();
-int loopHumidity();
+float loopTemperature();
+float loopHumidity();
 void setupDHT22();
 
 

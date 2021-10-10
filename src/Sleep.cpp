@@ -20,7 +20,7 @@
 
 #define nightSleepTime 21600
 
-int awakeTime = 60;
+int awakeTime = 300;
 int actualTime = 0;
 
 TaskHandle_t sleepControllHandle;

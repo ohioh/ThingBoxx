@@ -8,7 +8,7 @@
   April 4, 2017
 
   https://github.com/sparkfun/CCS811_Air_Quality_Breakout
-  https://github.com/sparkfun/SparkFun_CCS811_Arduino_Library
+  https://adafruit.github.io/Adafruit_CCS811/html/class_adafruit___c_c_s811.html
   https://joy-it.net/files/files/Produkte/SEN-CCS811V1/SEN-CCS811V1-Anleitung-2.11.2020.pdf
 
   Read the TVOC and CO2 values from the SparkFun CSS811 breakout board
@@ -26,6 +26,9 @@
 #include <Arduino.h>
 #include <Adafruit_CCS811.h>
 #include "Variables.hpp"
+#include "LED1.hpp"
+#include "DHT22.hpp"
+
 
 
 Adafruit_CCS811 ccs;
@@ -36,6 +39,8 @@ int messurmentCo2 = 400;
 
 TaskHandle_t getCo2AverageHandle;
 RTC_DATA_ATTR int AverageC02Value = 400;
+RTC_DATA_ATTR uint16_t BaseLine;
+int messurmentCounter = 0;
 
 void setupCO2()
 {
@@ -54,6 +59,14 @@ void setupCO2()
   }
   else
   {
+
+    Serial.println("Get the Temperature to calibrate CCS811.");
+    float temperature  = loopTemperature();
+    float humidity = loopHumidity();
+    
+    ccs.setBaseline(BaseLine);
+    delay(150);
+    ccs.setEnvironmentalData(humidity,  temperature);
     /**************************************************************************/
     /*!
         (es werden keine Messungen durchgeführt)
@@ -77,15 +90,27 @@ void getCO2Average(void *pvParameters)
     if (ccs.available()) {
       if (!ccs.readData()) {
         Serial.print(" CO2: ");
-        AverageC02Value = ((AverageC02Value + ccs.geteCO2())/2);
+        int Co2Value = ccs.geteCO2();
+        AverageC02Value = ((AverageC02Value + Co2Value) / 2);
+        AverageC02Value = ((AverageC02Value + Co2Value) / 2);
+        AverageC02Value = ((AverageC02Value + Co2Value) / 2);
         Serial.print(AverageC02Value);
         Serial.print(" ppm, TVOC: ");
-        Serial.println(ccs.getTVOC());
+        Serial.print(ccs.getTVOC());
+        Serial.print(" counter: ");
+        Serial.print(messurmentCounter);
+        messurmentCounter++;
+        delay(1000);
       }
       else {
         Serial.println("ERROR!");
         while (1);
       }
+    }
+    if ( messurmentCounter == 10) {
+      mainCO22Signal(AverageC02Value);
+      BaseLine = ccs.getBaseline();
+      messurmentCounter = 0;
     }
     yield();
     delay (1000);

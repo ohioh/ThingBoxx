@@ -49,8 +49,8 @@ extern uint16_t ADCValue;
 extern int CO2_Address;
 extern int DEVICE_STATE_ADDRESS;
 extern uint16_t DEVICE_STATE;
-extern int temp;
-extern int humidity;
+extern float temp;
+extern float humidity;
 extern int Co2;
 
 //LORAWAN-Variables

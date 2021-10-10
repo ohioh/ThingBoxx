@@ -73,8 +73,8 @@ uint16_t ADCValue = 0;
 int CO2_Address = 90;
 int DEVICE_STATE_ADDRESS = 25;
 uint16_t DEVICE_STATE = 77;
-int temp;
-int humidity;
+float temp;
+float humidity;
 int Co2;
 
 // -> void decToBinary(int input):

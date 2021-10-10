@@ -75,6 +75,10 @@ TaskHandle_t  activeLoRaWanHandler ;
 
 RTC_DATA_ATTR int bootCount = 0;
 
+int TimeTillToSend = 60;
+int TimeCounter = 0;
+
+
 
 
 /*---------------------------------------------------------------------------------------------------*/
@@ -283,9 +287,22 @@ void setup()
   display.setTextSize(1);
   display.print("Initializing...");
   display.display();
-  delay(1000);
+  delay(2000);
+
+
+  int Temp = loopTemperature();
   display.clearDisplay();
+  display.setCursor(2, 5);
+  display.setTextSize(3);
+  display.setTextColor(WHITE);
+  display.println("Temp:");
+  display.setCursor(55, 35);
+  display.setTextSize(3);
+  display.print(Temp);
+  display.setCursor(75, 35);
+  display.print(" C");
   display.display();
+
   setupCO2();
   delay(1000);
   loopCO2();
@@ -323,58 +340,89 @@ void loop()
     Serial.printf("%08X\n", (uint32_t)chipid); //print Low 4bytes.
   */
   // TODO
-  /* 
-  int address = 90;
-  int readId;
-  readId = EEPROM.read(address); //EEPROM.get(address,readId);
+  /*
+    int address = 90;
+    int readId;
+    readId = EEPROM.read(address); //EEPROM.get(address,readId);
 
-  if (readId == 1){
+    if (readId == 1){
     ESP.restart();
-  }
+    }
   */
- 
-  switch ( deviceState )
-  {
-    case DEVICE_STATE_INIT:
-      {
-        LoRaWAN.init(loraWanClass, loraWanRegion);
-        break;
-      }
-    case DEVICE_STATE_JOIN:
-      {
-        LoRaWAN.join();
-        break;
-      }
-    case DEVICE_STATE_SEND:
-      {
-        prepareTxFrame( appPort );
-        LoRaWAN.send(loraWanClass);
-        deviceState = DEVICE_STATE_CYCLE;
-        break;
-      }
-    case DEVICE_STATE_CYCLE:
-      {
-        // Schedule next packet transmission
-        txDutyCycleTime = appTxDutyCycle + randr( -APP_TX_DUTYCYCLE_RND, APP_TX_DUTYCYCLE_RND ) ;
-        Serial.print(" DUTY:");
-        Serial.println(txDutyCycleTime);
-        LoRaWAN.cycle(txDutyCycleTime);
-        deviceState = DEVICE_STATE_SLEEP;
-        break;
-      }
-    case DEVICE_STATE_SLEEP:
-      {
-        
-        LoRaWAN.sleep(loraWanClass, debugLevel);
-        break;
-      }
-    default:
-      {
-        deviceState = DEVICE_STATE_INIT;
-        break;
-      }
-  }
 
+  if ( TimeCounter < TimeTillToSend) {
+    TimeCounter++;
+
+    Serial.print(" Sending in: ");
+    int timeLeft = TimeTillToSend - TimeCounter;
+    Serial.println(timeLeft);
+    display.clearDisplay();
+    display.setCursor(2, 5);
+    display.setTextSize(3);
+    display.setTextColor(WHITE);
+    display.println("CO2:");
+    display.setCursor(55, 35);
+    display.setTextSize(3);
+    display.print(AverageC02Value);
+    display.display();
+    delay(1000);
+  } else if (TimeCounter >= TimeTillToSend) {
+
+
+    switch ( deviceState )
+    {
+      case DEVICE_STATE_INIT:
+        {
+          LoRaWAN.init(loraWanClass, loraWanRegion);
+          Serial.print(" Sending in: ");
+          int timeLeft = TimeTillToSend - TimeCounter;
+          Serial.println(timeLeft);
+          display.clearDisplay();
+          display.setCursor(2, 5);
+          display.setTextSize(3);
+          display.setTextColor(WHITE);
+          display.println("CO2:");
+          display.setCursor(55, 35);
+          display.setTextSize(3);
+          display.print(AverageC02Value);
+          display.display();
+          delay(1000);
+          break;
+        }
+      case DEVICE_STATE_JOIN:
+        {
+          LoRaWAN.join();
+          break;
+        }
+      case DEVICE_STATE_SEND:
+        {
+          prepareTxFrame( appPort );
+          LoRaWAN.send(loraWanClass);
+          deviceState = DEVICE_STATE_CYCLE;
+          break;
+        }
+      case DEVICE_STATE_CYCLE:
+        {
+          // Schedule next packet transmission
+          txDutyCycleTime = appTxDutyCycle + randr( -APP_TX_DUTYCYCLE_RND, APP_TX_DUTYCYCLE_RND )  ;
+          Serial.print(" DUTY:");
+          Serial.println(txDutyCycleTime);
+          LoRaWAN.cycle(txDutyCycleTime);
+          deviceState = DEVICE_STATE_SLEEP;
+          break;
+        }
+      case DEVICE_STATE_SLEEP:
+        {
+          LoRaWAN.sleep(loraWanClass, debugLevel);
+          break;
+        }
+      default:
+        {
+          deviceState = DEVICE_STATE_INIT;
+          break;
+        }
+    }
+  }
   //ESP.restart();
   /*
   */
