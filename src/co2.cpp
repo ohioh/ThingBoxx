@@ -84,6 +84,7 @@ void setupCO2()
 void getCO2Average(void *pvParameters)
 {
   for (;;)    {
+    Serial.println("-----------------------------------");
     Serial.print("getCO2Average-Task runs on Core: ");
     Serial.print(xPortGetCoreID());
     Serial.print(" with  ");

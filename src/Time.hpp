@@ -9,8 +9,9 @@
 #pragma once
 
 
-void setESP32Time();
-int getESP32Time();
-void storeESP32Time();
+void rtcSetTimeSetup();
+void rtcBeginnTimeSetup();
+long getRTCTime();
+int getRTCHour();
 
 #endif

@@ -61,6 +61,7 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 uint64_t chipid;
 
 RTC_DATA_ATTR int BaseLineCounter = 0;
+RTC_DATA_ATTR int isRTCActivated = 0;
 
 //Production
 //RTC_DATA_ATTR uint16_t nightTime = 21600000;
@@ -251,20 +252,8 @@ void setup()
   //pinMode( 21, OUTPUT );
   //digitalWrite( 21, LOW );
 
-  delay(10);
-  setESP32Time();
-  delay(50);
-  getESP32Time();
-  delay(50);
-  storeESP32Time();
-  delay(50);
-
   setupDHT22();
-
-  //while (!Serial);
-
-
-
+  
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C); //initialize with the I2C addr 0x3C (128x64)
   delay(500);
   display.clearDisplay();
@@ -308,18 +297,17 @@ void setup()
   loopCO2();
   delay(1000);
   loopSleepTimeControll();
-  /*loopCO2();
-    delay(1000);
+  rtcSetTimeSetup();
+  /*
+  
+  rtcBeginnTimeSetup();
 
+  if ( isRTCActivated == 0 ) {
+    rtcSetTimeSetup();
+    isRTCActivated = 1;
+  }
 
-    xTaskCreatePinnedToCore(
-    activeLoRaWan,        // Function that should be called
-    "getCO2 Average",     // Name of the task (for debugging)
-    10000,                // Stack size (bytes)
-    NULL,                 // Parameter to pass
-    1,                    // Task priority
-    &activeLoRaWanHandler, // Task handle
-    1); //Core
+  getRTCTime();
   */
   Serial.println("Waiting for messurment:");
   //Activate the LoRaWan-Module
@@ -368,7 +356,7 @@ void loop()
     delay(1000);
   } else if (TimeCounter >= TimeTillToSend) {
 
-
+    /*
     switch ( deviceState )
     {
       case DEVICE_STATE_INIT:
@@ -422,9 +410,9 @@ void loop()
           break;
         }
     }
+     */
   }
-  //ESP.restart();
-  /*
-  */
+ 
+
 
 }

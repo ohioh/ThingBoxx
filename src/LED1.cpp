@@ -23,7 +23,7 @@
 TaskHandle_t redAlertBlinkCore;
 TaskHandle_t redLEDBlinkCore;
 
-int LED_SET = 2; // 2 Sets are avaible Version1 = 1 the Version2 = 2
+int LED_SET = 1; // 2 Sets are avaible Version1 = 1 the Version2 = 2
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
